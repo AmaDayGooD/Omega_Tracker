@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AuthorizationActivity">
+
+
+    <EditText
+        android:id="@+id/enterToken"
+        android:layout_width="341dp"
+        android:layout_height="67dp"
+        android:layout_marginTop="264dp"
+        android:backgroundTint="#9B51E0"
+        android:ems="10"
+        android:hint="@string/hint_enter_token"
+        android:inputType="text"
+        android:lines="1"
+        android:maxLines="1"
+        android:textColor="#1E1E1E"
+        android:textColorHighlight="#9B51E0"
+        android:textColorHint="#99747474"
+        android:textCursorDrawable="@xml/underline"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/authButton"
+        android:layout_width="210dp"
+        android:layout_height="53dp"
+        android:layout_marginTop="24dp"
+        android:background="@color/main"
+        android:elevation="0dp"
+        android:text="@string/button_auth"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/enterToken" />
+
+    <TextView
+        android:id="@+id/helpForToken"
+        android:layout_width="149dp"
+        android:layout_height="23dp"
+        android:linksClickable="false"
+        android:text="@string/label_get_token"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/authButton"
+        app:layout_constraintVertical_bias="0.1" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

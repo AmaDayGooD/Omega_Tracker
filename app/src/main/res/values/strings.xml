@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Omega Tracker</string>
+    <string name="hint_enter_token">Введите ваш токен</string>
+    <string name="label_get_token">Как получить токен?</string>
+    <string name="button_auth">Авторизация</string>
+    <string name="task">Задачи</string>
+    <string name="title_activity_main2">MainActivity2</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="start_count">Начать отсчёт</string>
+    <string name="pause">Пауза</string>
+    <string name="complete">Завершить</string>
+    <string name="exit">Выйти</string>
+    <string name="settings">Настройки</string>
+    
+    
+    <string name="time_over">Просрочено на\n%s</string>
+</resources>
