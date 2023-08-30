@@ -1,55 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".AuthorizationActivity">
+    android:orientation="vertical"
+    tools:context=".ui.screens.auth.AuthorizationActivity">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical">
 
-    <EditText
-        android:id="@+id/enterToken"
-        android:layout_width="341dp"
-        android:layout_height="67dp"
-        android:layout_marginTop="264dp"
-        android:backgroundTint="#9B51E0"
-        android:ems="10"
-        android:hint="@string/hint_enter_token"
-        android:inputType="text"
-        android:lines="1"
-        android:maxLines="1"
-        android:textColor="#1E1E1E"
-        android:textColorHighlight="#9B51E0"
-        android:textColorHint="#99747474"
-        android:textCursorDrawable="@xml/underline"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <EditText
+            android:id="@+id/enterToken"
+            android:layout_width="341dp"
+            android:layout_height="67dp"
+            android:layout_gravity="center"
+            android:layout_marginBottom="20dp"
+            android:backgroundTint="#9B51E0"
+            android:hint="@string/hint_enter_token"
+            android:inputType="text"
+            android:lines="1"
+            android:maxLines="1"
+            android:textColor="#1E1E1E"
+            android:textColorHighlight="#9B51E0"
+            android:textColorHint="#99747474"
+            android:textCursorDrawable="@xml/underline" />
 
-    <Button
-        android:id="@+id/authButton"
-        android:layout_width="210dp"
-        android:layout_height="53dp"
-        android:layout_marginTop="24dp"
-        android:background="@color/main"
+        <Button
+            android:id="@+id/authButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:background="@color/main"
+            android:elevation="0dp"
+            android:text="@string/button_auth" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/corner_bottom_sheep"
+        app:behavior_peekHeight="50dp"
+        app:cardCornerRadius="26dp"
         android:elevation="0dp"
-        android:text="@string/button_auth"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/enterToken" />
+        app:layout_behavior="@string/bottom_sheet_behavior">
 
-    <TextView
-        android:id="@+id/helpForToken"
-        android:layout_width="149dp"
-        android:layout_height="23dp"
-        android:linksClickable="false"
-        android:text="@string/label_get_token"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/authButton"
-        app:layout_constraintVertical_bias="0.1" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/label_get_token"
+            android:textColor="@color/real_white"
+            android:fontFamily="@font/rubik_medium"
+            android:backgroundTint="@color/bg_mainHelpfoGetToken"
+            android:textSize="25sp"
+            android:layout_marginVertical="10dp"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:paddingHorizontal="20dp"
+            android:paddingBottom="20dp">
+
+            <TextView
+                android:id="@+id/getTokenHelp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="5dp"
+                android:text="@string/helpForGetToken"
+                android:backgroundTint="@color/bg_mainHelpfoGetToken"
+                android:textColor="@color/real_white"
+                android:textSize="15sp" />
+        </androidx.core.widget.NestedScrollView>
+
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

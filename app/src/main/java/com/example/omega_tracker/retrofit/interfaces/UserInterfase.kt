@@ -8,7 +8,6 @@ import retrofit2.http.Headers
 
 interface UserInterfase {
     @Headers(
-        //"Authorization: Bearer perm:cm9vdA==.NTAtMQ==.bYTlD3WROnK9s3HuWa43iTxJPnTK7A",
         "Accept: application/json"
     )
     @GET("api/users/me?fields=name")

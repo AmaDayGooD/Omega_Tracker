@@ -17,4 +17,8 @@
     <color name="light_pink">#FFEFF1</color>
     <color name="bg_circle">#E9E9FF</color>
     <color name="error_color">#FF0000</color>
+    <color name="bg_bottomsheet">#99000000</color>
+    <color name="bg_mainHelpfoGetToken">#CC9B51E0</color>
+    <color name="green">#27AE60</color>
+    <color name="ligth_green">#E6FCF4</color>
 </resources>
