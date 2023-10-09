@@ -5,7 +5,24 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.screens.auth.AuthorizationActivity">
+    tools:context=".ui.screens.authorization.AuthorizationActivity">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="200dp"
+        android:paddingHorizontal="35dp"
+        android:src="@drawable/logo_omegatracker" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="300dp"
+        android:fontFamily="@font/rubik_medium"
+        android:text="@string/welcome"
+        android:textSize="24sp" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,51 +31,74 @@
         android:orientation="vertical">
 
         <EditText
-            android:id="@+id/enterToken"
+            android:id="@+id/input_enterToken"
             android:layout_width="341dp"
-            android:layout_height="67dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginBottom="20dp"
-            android:backgroundTint="#9B51E0"
+            android:backgroundTint="@color/main"
             android:hint="@string/hint_enter_token"
             android:inputType="text"
-            android:lines="1"
-            android:maxLines="1"
-            android:textColor="#1E1E1E"
-            android:textColorHighlight="#9B51E0"
-            android:textColorHint="#99747474"
+            android:paddingVertical="20dp"
+            android:textColor="@color/black"
+            android:textColorHint="@color/light_gray"
             android:textCursorDrawable="@xml/underline" />
 
-        <Button
-            android:id="@+id/authButton"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/button_authorization"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:background="@color/main"
+            app:cardBackgroundColor="@color/main"
+            android:background="@drawable/bg_button_authorization_normal"
+            android:clickable="true"
             android:elevation="0dp"
-            android:text="@string/button_auth" />
+            android:minWidth="200dp"
+            android:minHeight="40dp"
+            app:cardCornerRadius="6dp">
+
+            <ProgressBar
+                android:id="@+id/progress_bar_loading"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_gravity="center"
+                android:elevation="10dp"
+                android:indeterminateTint="@color/real_white"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/text_on_Button_Authorization"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:fontFamily="@font/rubik_regular"
+                android:text="@string/button_auth"
+                android:textColor="@color/real_white"
+                android:textSize="24sp" />
+
+
+        </com.google.android.material.card.MaterialCardView>
+
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@drawable/corner_bottom_sheep"
-        app:behavior_peekHeight="50dp"
-        app:cardCornerRadius="26dp"
+        android:background="@drawable/bg_bottom_sheep"
         android:elevation="0dp"
+        android:orientation="vertical"
+        app:behavior_peekHeight="100dp"
+        app:cardCornerRadius="26dp"
         app:layout_behavior="@string/bottom_sheet_behavior">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
+            android:layout_marginVertical="30dp"
+            android:fontFamily="@font/rubik_medium"
             android:text="@string/label_get_token"
             android:textColor="@color/real_white"
-            android:fontFamily="@font/rubik_medium"
-            android:backgroundTint="@color/bg_mainHelpfoGetToken"
-            android:textSize="25sp"
-            android:layout_marginVertical="10dp"/>
+            android:textSize="32sp" />
 
         <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
@@ -68,14 +108,13 @@
             android:paddingBottom="20dp">
 
             <TextView
-                android:id="@+id/getTokenHelp"
+                android:id="@+id/text_getTokenHelp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="5dp"
-                android:text="@string/helpForGetToken"
-                android:backgroundTint="@color/bg_mainHelpfoGetToken"
+                android:text="@string/help_for_get_token"
                 android:textColor="@color/real_white"
-                android:textSize="15sp" />
+                android:textSize="20sp" />
         </androidx.core.widget.NestedScrollView>
 
     </LinearLayout>

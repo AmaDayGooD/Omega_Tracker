@@ -13,15 +13,30 @@
     <string name="complete">Завершить</string>
     <string name="exit">Выйти</string>
     <string name="settings">Настройки</string>
-    
-    
+    <string name="successfully">Успешно</string>
     <string name="time_over">Просрочено на\n%s</string>
-    <string name="descriptionTask">Описание</string>
-    <string name="helpForGetToken">1. Перейдите в свой аккаунт YouTrack
+    <string name="description_task">Описание</string>
+    <string name="help_for_get_token">1. Перейдите в свой аккаунт YouTrack
 \n\n2. Нажмите на свой аватар в шапке приложения и выберите в меню Профиль.
 \n\n3. Перейдите на вкладку «Безопасность учетной записи».\n4. Нажмите кнопку «Новый токен».
 \n\n5. В диалоговом окне «Новый постоянный токен» укажите имя нового токена и область доступа к нему. Область действия токена — это список служб, к которым вы можете получить доступ с помощью этого нового токена.
 \n\n6. Нажмите кнопку Создать токен. Отображается диалоговое окно с новым токеном.
 \n\n7. Нажмите кнопку «Копировать токен».
 \n\n8. Поздравляю, вы получили свой токен доступа, теперь вставьте его в поле ввода</string>
+    <string name="welcome">Добро пожаловать!</string>
+    <string name="no_internet">Нет подключения\nк интернету</string>
+    <string name="invalidToken">Неверный токен</string>
+    <string name="enter_token">Введите токен</string>
+    <string name="timer_stopped">Таймер остановлен</string>
+    <string name="task_completed">Задача завершена</string>
+    <string name="create_new_task">Создал новую задачу</string>
+    <string name="come_out">Выходим…</string>
+    <string name="task_completed_by_time">Задача завершена по истечению времени</string>
+    <string name="time_out">Время вышло</string>
+    <string name="no_data">Нет данных</string>
+    <string name="timer_run">Таймер запущен</string>
+    <string name="comment">Комментарий</string>
+    <string name="write_comment">Напишите комментарий</string>
+    <string name="h">ч.</string>
+    <string name="m">м.</string>
 </resources>

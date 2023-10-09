@@ -1,4 +1,4 @@
-package com.example.omega_tracker.retrofit.dataclasses
+package com.example.omega_tracker.data.repository.remote_data.retrofit.dataclasses
 
 import com.google.gson.annotations.SerializedName
 
