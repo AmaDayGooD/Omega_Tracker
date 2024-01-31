@@ -13,7 +13,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="200dp"
         android:paddingHorizontal="35dp"
-        android:src="@drawable/logo_omegatracker" />
+        android:src="@drawable/ic_omegatracker" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -36,6 +36,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginBottom="20dp"
+            android:autofillHints="token"
             android:backgroundTint="@color/main"
             android:hint="@string/hint_enter_token"
             android:inputType="text"
@@ -48,12 +49,12 @@
             android:id="@+id/button_authorization"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/main"
             android:background="@drawable/bg_button_authorization_normal"
             android:clickable="true"
             android:elevation="0dp"
             android:minWidth="200dp"
             android:minHeight="40dp"
+            app:cardBackgroundColor="@color/main"
             app:cardCornerRadius="6dp">
 
             <ProgressBar
@@ -74,8 +75,6 @@
                 android:text="@string/button_auth"
                 android:textColor="@color/real_white"
                 android:textSize="24sp" />
-
-
         </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>

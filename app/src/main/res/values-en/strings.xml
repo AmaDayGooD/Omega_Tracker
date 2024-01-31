@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Omega Tracker</string>
+    <string name="hint_enter_token">Enter your token</string>
+    <string name="label_get_token">How to get a token?</string>
+    <string name="button_auth">Authorization</string>
+    <string name="task">Tasks</string>
+    <string name="start_count">Start timer</string>
+    <string name="pause">Pause</string>
+    <string name="complete">Complete</string>
+    <string name="exit">Exit</string>
+    <string name="settings">Settings</string>
+    <string name="successfully">Successfully</string>
+    <string name="time_over">Overdue by\n%s</string>
+    <string name="description">Description</string>
+    <string name="description_task">Task description</string>
+    <string name="help_for_get_token">1. Go to your YouTrack account
+\n\n2. Click on your avatar in the application header and select Profile from the menu.
+\n\n3. Go to the "Account Security" tab.
+\n\n4. Click the "New token" button.
+\n\n5. In the "New Permanent Token" dialog, specify a name for the new token and the access scope for it. The scope for the token is a list of services that you can access with this new token.
+\n\n6. Click the Create token button. A dialog window with the new token is displayed.
+\n\n7. Click the "Copy token" button.
+\n\n8. Congratulations, you have obtained your access token, now paste it into the input field</string>
+    <string name="welcome">Welcome!</string>
+    <string name="no_internet">No internet connection</string>
+    <string name="invalidToken">Invalid token</string>
+    <string name="enter_token">Enter token</string>
+    <string name="timer_stopped">Timer stopped</string>
+    <string name="task_completed">Task completed</string>
+    <string name="create_new_task">Created new task</string>
+    <string name="come_out">Leaving…</string>
+    <string name="task_completed_by_time">Task completed by time</string>
+    <string name="time_out">Time\'s up</string>
+    <string name="no_data">No data</string>
+    <string name="timer_run">Timer started</string>
+    <string name="comment">Comment</string>
+    <string name="write_comment">Write a comment</string>
+    <string name="h">h</string>
+    <string name="m">m</string>
+    <string name="show_all">Show all</string>
+    <string name="today">Today</string>
+    <string name="all">All</string>
+    <string name="show_today">Show today</string>
+    <string name="track_time">Add spent time</string>
+    <string name="task_name">Task name</string>
+    <string name="time_spent">Time spent</string>
+    <string name="cancel">Cancel</string>
+    <string name="canceled">Canceled</string>
+    <string name="send">Send</string>
+    <string name="continue_timer">Continue</string>
+    <string name="time_sent_successfully">Time sent successfully</string>
+    <string name="error_try_later">Error\ntry later</string>
+    <string name="state_task">Task state</string>
+    <string name="status_changed_successfully">Status changed successfully</string>
+    <string name="status_changed_failed">Failed to change status</string>
+    <string name="impossible_completed_task_no_internet">Cannot complete task.\nNo internet connection</string>
+    <string name="minimal_time">Minimum time\n1 minute</string>
+    <string name="day">d</string>
+    <string name="hours">h</string>
+    <string name="minutes">m</string>
+    <string name="create_custom_task">Create custom task</string>
+    <string name="label">Name</string>
+    <string name="name_task">Task name</string>
+    <string name="create">Create</string>
+    <string name="summary_custom_task">Summary</string>
+    <string name="write_summary_custom_task">Write task summary</string>
+    <string name="select_time_and_date_custom_task">Select time and date</string>
+    <string name="timer_is_not_running">Timer not running</string>
+    <string name="time_past">Time past: </string>
+    <string name="example_time">2h35m</string>
+    <string name="term">Term</string>
+    <string name="custom_task">Custom tasks</string>
+    <string name="fill_all_fields">Fill in all fields</string>
+    <string name="custom_task_create">Custom task created</string>
+    <string name="add_time">Add time</string>
+    <string name="сomplete">Complete and delete task</string>
+    <string name="update_task">Update task</string>
+    <string name="update">Update</string>
+    <string name="no_date_specified">No date specified</string>
+    <string name="empty_fields">Fields should not be empty</string>
+    <string name="stop_the_task">Task should be stopped</string>
+    <string name="type_enter_time">Time input type</string>
+    <string name="language">Language</string>
+    <string name="error_in_field_term">The "Duration" field is filled in incorrectly</string>
+    <string name="field_is_filled_in_incorrectly">Field is filled in incorrectly</string>
+    <string name="change_task">Change task</string>
+    <string name="remove_task">Remove task</string>
+    <string name="are_you_sure_delete_task">Are you sure you want to delete the task?</string>
+    <string name="сonfirmation">Confirmation</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="delete_task">Delete task</string>
+    <string name="personal_task">Personal task</string>
+    <string name="profile">Профиль</string>
+    <string name="label_name">Имя</string>
+    <string name="last_name_label">Фамилия</string>
+    <string name="user_name_label">Имя пользователя</string>
+    <string name="standert_time_entery_type">Стандартный тип ввода времени</string>
+    <string name="theme">Тема</string>
+    <string name="email">Email</string>
+</resources>

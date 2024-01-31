@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFFFFF</color>
+    <color name="purple_500">#FFBB86FC</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FFFFFFFF</color>
+    <color name="gray">#E0E0E0</color>
+    <color name="main">#69329C</color>
+    <color name="mainBlack">#FFFFFF</color>
+    <color name="white">#292639</color>
+    <color name="mainGray">#E0E0E0</color>
+    <color name="light_Purple">#818181</color>
+    <color name="real_white">#070417</color>
+    <color name="only_white">#ffffff</color>
+    <color name="pink">#C6590B</color>
+    <color name="light_pink">#1F1F1F</color>
+    <color name="bg_circlebutton">#121212</color>
+    <color name="bg_circlebutton_disabled">#5E5E5E</color>
+    <color name="error_color">#FF0000</color>
+    <color name="light_error_color">#1F1F1F</color>
+    <color name="bg_bottomsheet">#FFFFFF</color>
+    <color name="green">#4CAF50</color>
+    <color name="ligth_green">#1F1F1F</color>
+    <color name="light_gray">#BDBDBD</color>
+    <color name="translucent">#B3000000</color>
+    <color name="toast_color">#B3FF0000</color>
+    <color name="toast_warning">#BFF1C40F</color>
+    <color name="toast_success">#BF28BE63</color>
+    <color name="toast_info">#BF555BFF</color>
+    <color name="transparent">#00FFFFFF</color>
+    <color name="light_green">#00C853</color>
+    <color name="milk_pink">#1F1F1F</color>
+    <color name="semitransparent_Purple">#676BB6</color>
+</resources>

@@ -2,9 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
@@ -19,20 +18,25 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Omega_Tracker"
         tools:targetApi="31">
+        <activity
+            android:name=".ui.screens.Profile.ProfileActivity"
+            android:exported="false" />
+
         <service
-            android:exported="false"
-            android:name=".service.ForegroundService"/>
+            android:name=".service.ForegroundService"
+            android:exported="false" />
+
         <activity
             android:name=".ui.screens.authorization.AuthorizationActivity"
-            android:exported="false"/>
+            android:exported="false" />
         <activity
             android:name=".ui.screens.startTask.StartTaskActivity"
-            android:exported="false"/>
+            android:exported="false" />
         <activity
             android:name=".ui.screens.main.MainActivity"
-            android:exported="false"/>
+            android:exported="false" />
         <activity
-            android:name=".ui.screens.splash.SplashActivity"
+            android:name=".ui.screens.splash.StartActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

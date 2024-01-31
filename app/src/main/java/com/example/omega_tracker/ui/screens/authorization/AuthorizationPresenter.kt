@@ -1,83 +1,83 @@
 package com.example.omega_tracker.ui.screens.authorization
 
 import com.example.omega_tracker.Constants
+import com.example.omega_tracker.OmegaTrackerApp
 import com.example.omega_tracker.R
-import com.example.omega_tracker.data.repository.local_data.Settings
-import com.example.omega_tracker.data.repository.local_data.Tasks_DAO
-import com.example.omega_tracker.data.repository.remote_data.api.InterfaceAuthModel
+import com.example.omega_tracker.data.local_data.Settings
+import com.example.omega_tracker.data.repository.AppRepository
+import com.example.omega_tracker.data.local_data.TasksDao
+import com.example.omega_tracker.entity.Profile
 import com.example.omega_tracker.ui.base_class.BasePresenter
+import com.example.omega_tracker.utils.FormatTime
+import com.omega_r.base.mvp.presenters.OmegaPresenter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import javax.inject.Inject
 
+class AuthorizationPresenter(private val settings: Settings) : BasePresenter<AuthorizationView>() {
+    init {
+        OmegaTrackerApp.appComponent!!.inject(this)
+    }
 
-class AuthorizationPresenter @Inject constructor(
-    retrofit: Retrofit,
-    private val view: AuthorizationView,
-    private val dataBaseTasks: Tasks_DAO
-) : BasePresenter() {
+    @Inject
+    lateinit var retrofit: Retrofit
 
-    private val interfaceAuthModel = InterfaceAuthModel(Dispatchers.Main,retrofit,dataBaseTasks)
+    @Inject
+    lateinit var dataBaseTasks: TasksDao
+
+    private val appRepository = AppRepository(Dispatchers.Main, retrofit, dataBaseTasks)
     private fun checkIsEmptyToken(token: String): Boolean {
         return token.isEmpty()
     }
 
+    fun auth(token: String) {
+        if (checkIsEmptyToken(token)) {
+            viewState.tokenIsEmpty()
+        } else {
+            requestApi(checkToken(token))
+        }
+    }
     private fun checkToken(token: String): String {
         return if (token.contains("perm:"))
             "Bearer $token"
         else "Bearer perm:$token"
     }
 
-    fun auth(token: String) {
-        if (checkIsEmptyToken(token)) {
-            view.tokenIsEmpty()
-        } else {
-            val fullToken = checkToken(token)
-            requestApi(fullToken)
-        }
-    }
     private fun requestApi(token: String) {
-        view.loadStart()
+        viewState.loadStart()
         launch {
-                val answer = interfaceAuthModel.getAuthResult(token)
-                answerDecision(answer, token)
+            val answer = appRepository.getAuthResult(token)
+            answerDecision(answer, token)
         }
     }
 
-    private fun answerDecision(answer: Boolean, token: String) {
-        if (answer) {
-            receivedGoodAnswer(token)
+    private fun answerDecision(answer: Profile?, token: String) {
+        if (answer == null) {
+            viewState.checkInternet(token)
         } else {
-            if (view.checkInternet())
-                receivedBadAnswer()
-            else
-                receiveNoInternet()
+            settings.saveProfile(answer)
+            receivedGoodAnswer(token)
         }
     }
 
     private fun receivedGoodAnswer(token: String) {
-        saveToken(view.initCacheToken(), token)
-        view.loadEnd()
-        view.showToast(Constants.TOAST_TYPE_SUCCESS, R.string.successfully)
-        view.setButtonColorRight()
-        view.goMainScreen(token)
+        viewState.saveToken(token)
+        viewState.loadEnd()
+        viewState.showToast(Constants.TOAST_TYPE_SUCCESS, R.string.successfully)
+        viewState.setButtonColorRight()
+        viewState.goMainScreen(token)
     }
 
-    private fun receivedBadAnswer() {
-        view.loadEnd()
-        view.setButtonColorError()
-        view.showToast(Constants.TOAST_TYPE_ERROR, R.string.invalidToken)
+    fun receivedBadAnswer() {
+        viewState.loadEnd()
+        viewState.setButtonColorError()
+        viewState.showToast(Constants.TOAST_TYPE_ERROR, R.string.invalidToken)
     }
 
-    private fun receiveNoInternet(){
-        view.loadEnd()
-        view.setButtonColorWarning()
-        view.showToast(Constants.TOAST_TYPE_WARNING, R.string.no_internet)
+    fun receiveNoInternet() {
+        viewState.loadEnd()
+        viewState.setButtonColorWarning()
+        viewState.showToast(Constants.TOAST_TYPE_WARNING, R.string.no_internet)
     }
-
-    private fun saveToken(authCacheToken: Settings, token: String) {
-        authCacheToken.saveString(token)
-    }
-
 }

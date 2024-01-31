@@ -3,7 +3,7 @@
     android:id="@+id/toast_message"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="20dp"
+    android:layout_marginHorizontal="18dp"
     android:background="@drawable/bg_toast_warning"
     android:gravity="center"
     android:orientation="horizontal"
@@ -13,12 +13,8 @@
         android:id="@+id/text_toast_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginVertical="5dp"
-        android:text="CoordinatorLayoutCoordinatorLayoutCoordinatorLayoutCoordinatorLayoutCoordinatorLayoutCoordinatorLayout"
-        android:textColor="@color/real_white"
         android:fontFamily="@font/rubik_medium"
-        android:textSize="20sp"
-        android:textAlignment="center"/>
-
-
+        android:textAlignment="center"
+        android:textColor="@color/real_white"
+        android:textSize="20sp" />
 </LinearLayout>

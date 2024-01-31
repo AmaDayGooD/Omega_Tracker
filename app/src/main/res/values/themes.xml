@@ -13,4 +13,19 @@
         <item name="android:statusBarColor">@color/main</item>
         <!-- Customize your theme here. -->
     </style>
+    <style name="DataPickerDialogTheme" parent="ThemeOverlay.Material3.MaterialCalendar">
+        <item name="colorAccent">@color/main</item>
+    </style>
+    <style name="TimePickerDialogTheme" parent="ThemeOverlay.Material3.MaterialTimePicker">
+        <item name="colorAccent">@color/main</item>
+    </style>
+    
+    <style name="NumberPickerTheme" parent="Theme.AppCompat.Light">
+        <item name="colorAccent">@color/green</item>
+        <item name="colorControlNormal">@android:color/transparent</item>
+        <item name="fontFamily">@font/rubik_extrabold</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColorPrimary">@color/real_white</item>
+        <item name="background">@color/light_pink</item>
+    </style>
 </resources>

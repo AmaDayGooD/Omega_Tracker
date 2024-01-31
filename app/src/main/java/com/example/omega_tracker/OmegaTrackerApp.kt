@@ -5,24 +5,32 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
-import com.example.omega_tracker.data.repository.local_data.TasksDB
-import dagger.hilt.android.HiltAndroidApp
+import com.example.omega_tracker.di.AppComponent
+import com.example.omega_tracker.di.ContextModule
+import com.example.omega_tracker.di.DaggerAppComponent
 
-@HiltAndroidApp
 class OmegaTrackerApp : Application() {
-    val database by lazy { TasksDB.createDataBase(this) }
-
     override fun onCreate() {
         super.onCreate()
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        appComponent = DaggerAppComponent.builder()
+            .contextModule(ContextModule(this))
+            .build()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 "running_channel",
                 "Running Notification",
                 NotificationManager.IMPORTANCE_DEFAULT
             )
-            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val notificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
-
         }
     }
+
+    companion object {
+        var appComponent: AppComponent? = null
+            private set
+    }
+
 }

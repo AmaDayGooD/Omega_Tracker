@@ -14,82 +14,138 @@
         android:layout_gravity="center_horizontal"
         android:fontFamily="@font/rubik_medium"
         android:paddingBottom="20dp"
-        android:text="Затрекать время"
+        android:text="@string/track_time"
+        android:textAlignment="center"
         android:textColor="@color/real_white"
         android:textSize="30sp" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Название задачи:"
-        android:textColor="@color/real_white" />
+        android:fontFamily="@font/rubik_medium"
+        android:text="@string/time_spent"
+        android:textColor="@color/real_white"
+        android:textSize="16sp" />
+
+    <LinearLayout
+        android:id="@+id/linearlayout_term_custom"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:baselineAligned="false"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight=".3"
+            android:orientation="horizontal">
+
+            <NumberPicker
+                android:id="@+id/numberpicker_days"
+                android:layout_width="50dp"
+                android:layout_height="75dp"
+                android:layout_marginHorizontal="10dp"
+                android:layout_marginVertical="10dp"
+                android:background="@color/light_Purple"
+                android:theme="@style/NumberPickerTheme"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:fontFamily="@font/rubik_regular"
+                android:text="@string/day"
+                android:textColor="@color/real_white"
+                android:textSize="22sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight=".3"
+            android:orientation="horizontal">
+
+            <NumberPicker
+                android:id="@+id/numberpicker_hours"
+                android:layout_width="50dp"
+                android:layout_height="75dp"
+                android:layout_marginHorizontal="10dp"
+                android:layout_marginVertical="10dp"
+                android:background="@color/light_Purple"
+                android:theme="@style/NumberPickerTheme"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:fontFamily="@font/rubik_regular"
+                android:text="@string/hours"
+                android:textColor="@color/real_white"
+                android:textSize="22sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight=".3"
+            android:orientation="horizontal">
+
+
+
+            <NumberPicker
+                android:id="@+id/numberpicker_minuts"
+                android:layout_width="50dp"
+                android:layout_height="75dp"
+                android:layout_marginHorizontal="10dp"
+                android:layout_marginVertical="10dp"
+                android:background="@color/light_Purple"
+                android:theme="@style/NumberPickerTheme"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:fontFamily="@font/rubik_regular"
+                android:text="@string/minutes"
+                android:textColor="@color/real_white"
+                android:textSize="22sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/edittext_term_youtrack"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/light_Purple"
+        android:digits="0123456789чмhm"
+        android:hint="@string/example_time"
+        android:minLines="1"
+        android:paddingHorizontal="5dp"
+        android:textColor="@color/real_white"
+        android:textColorHint="@color/light_Purple"
+        android:visibility="gone"/>
 
     <TextView
-        android:id="@+id/text_name_task"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:fontFamily="@font/rubik_medium"
+        android:text="@string/state_task"
+        android:textColor="@color/real_white"
+        android:textSize="16sp" />
+
+    <Spinner
+        android:id="@+id/spinner_statetask"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="5dp" />
+
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fontFamily="@font/rubik_medium"
-        android:paddingVertical="5dp"
-        android:textColor="@color/real_white"
-        android:textSize="20sp" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Время прошло"
-        android:textColor="@color/real_white" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal">
-
-        <EditText
-            android:id="@+id/editText_hours"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/rubik_regular"
-            android:inputType="number"
-            android:maxLength="2"
-            android:maxLines="1"
-            android:minWidth="30dp"
-            android:singleLine="true"
-            android:textAlignment="center"
-            android:textColor="@color/real_white"
-            android:textSize="20sp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/h"
-            android:textColor="@color/real_white"
-            android:textSize="20sp" />
-
-        <EditText
-            android:id="@+id/editText_minutes"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:inputType="number"
-            android:maxLength="2"
-            android:minWidth="30dp"
-            android:textColor="@color/real_white"
-            android:textSize="20sp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/m"
-            android:textColor="@color/real_white"
-            android:textSize="20sp" />
-    </LinearLayout>
-
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:text="@string/comment"
-        android:textColor="@color/real_white" />
+        android:textColor="@color/real_white"
+        android:textSize="16sp" />
 
     <EditText
         android:id="@+id/comment"
@@ -98,6 +154,7 @@
         android:hint="@string/write_comment"
         android:maxLines="10"
         android:minLines="2"
+        android:backgroundTint="@color/light_Purple"
         android:paddingHorizontal="5dp"
         android:textColor="@color/real_white"
         android:textColorHint="@color/light_Purple" />
@@ -126,7 +183,7 @@
                 android:layout_marginHorizontal="15dp"
                 android:layout_marginVertical="10dp"
                 android:fontFamily="@font/rubik_regular"
-                android:text="Отменить"
+                android:text="@string/cancel"
                 android:textColor="@color/real_white"
                 android:textSize="15sp" />
         </androidx.cardview.widget.CardView>
@@ -147,7 +204,7 @@
                 android:layout_marginHorizontal="15dp"
                 android:layout_marginVertical="10dp"
                 android:fontFamily="@font/rubik_regular"
-                android:text="Отправить"
+                android:text="@string/send"
                 android:textColor="@color/real_white"
                 android:textSize="15sp" />
         </androidx.cardview.widget.CardView>
