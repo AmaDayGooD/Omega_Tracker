@@ -6,6 +6,8 @@ import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.icu.text.DateFormatSymbols
 import android.net.Uri
 import android.os.Bundle
@@ -13,8 +15,10 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
 import android.view.Window
 import android.widget.*
+import android.widget.RelativeLayout.LayoutParams
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
@@ -59,6 +63,7 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
 
     //Переменные для кастомных задач
     private lateinit var dialog: Dialog
+    private lateinit var dialogLoading: Dialog
     private var yearFromCalendar = 0
     private var monthFromCalendar = 0
     private var monthForLabel = ""
@@ -81,17 +86,16 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         presenter.setProfile()
-
+        dialogLoading =
+            Dialog(this)
         nameProjects = mutableListOf(getString(R.string.custom_task))
 
         binding.recycleView.layoutManager = LinearLayoutManager(this)
         binding.recycleView.adapter = adapter
-        adapter.addDivider(UiModel.DividerModel(Divider(1, false)))
 
         binding.buttonSettings.setOnClickListener {
             val popupMenu = PopupMenu(this, it)
@@ -103,6 +107,7 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
         }
 
         presenter.getAllNameProjects()
+        presenter.getTaskForRestore()
     }
 
     override fun onStart() {
@@ -116,18 +121,12 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
 
     override fun onResume() {
         super.onResume()
-        if (onFirst) {
-            presenter.getTaskForRestore()
-            onFirst = false
-        } else {
-            updateListTask()
-
-        }
+        presenter.updateListTask(currentStateList)
         presenter.getNotRunningTask()
     }
 
     override fun removeNotRunningTask(notRunningTask: RunningTask) {
-        adapter.removeRunningTask(UiModel.RunningTaskModel(notRunningTask))
+        adapter.removeNotRunningTask(notRunningTask)
     }
 
     //Получение названий проектов
@@ -139,7 +138,6 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
 
     override fun onClickItemChange(): Boolean {
         currentStateList = !currentStateList
-        log("$currentStateList")
         if (currentStateList) {
             loadCurrentDataTasks()
         } else {
@@ -149,16 +147,12 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
     }
 
     // Обновить список запущенных задач
-    override fun updateListRunningTask(listRunningTask: MutableList<RunningTask>) {
-        listRunningTask.forEach { runningTask ->
-            val runningTaskModel = UiModel.RunningTaskModel(runningTask)
-            adapter.updateRunningTask(runningTaskModel)
-        }
+    override fun updateRunningTask(listRunningTask: RunningTask) {
+        adapter.updateRunningTask(listRunningTask)
     }
 
     override fun addItemRunningTask(itemLRunningTask: RunningTask) {
-        val uiModelRunningTask = UiModel.RunningTaskModel(itemLRunningTask)
-        adapter.addRunningTask(uiModelRunningTask)
+        adapter.addRunningTask(itemLRunningTask)
     }
 
     // Восстановить запущенные задачи
@@ -195,15 +189,6 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
             ).into(binding.imageProfile)
     }
 
-    // Обновить список задач
-    override fun updateListTask() {
-        if (currentStateList) {
-            loadCurrentDataTasks()
-        } else {
-            loadAllTasks()
-        }
-    }
-
     // Загрузить задачи на сегодня
     override fun loadCurrentDataTasks() {
         presenter.loadCurrentDataTask(adapter, onFirst)
@@ -216,16 +201,24 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
         onFirst = false
     }
 
+
     // Убрать анимацию загрузки
     override fun removeLoadBar() {
-        binding.progressBarLoading.visibility = View.GONE
-        binding.buttonSettings.isEnabled = true
+        if (dialogLoading.isShowing) {
+            dialogLoading.dismiss()
+        }
+        return
     }
 
     // Восстановить анимацию загрузки
     override fun restoreLoadBar() {
-        binding.progressBarLoading.visibility = View.VISIBLE
-        binding.buttonSettings.isEnabled = false
+
+        dialogLoading.setContentView(R.layout.dialog_loading)
+        dialogLoading.window?.setLayout(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+        dialogLoading.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+//        binding.progressBarLoading.visibility = View.VISIBLE
+//        binding.buttonSettings.isEnabled = false
+        dialogLoading.show()
     }
 
     // Перейти на активити авторизации
@@ -253,34 +246,6 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
         }
         popupMenu.inflate(R.menu.menu_main)
         popupMenu.show()
-    }
-
-    private fun showSettings() {
-        dialog = Dialog(this)
-        dialog.window!!.setLayout(100, 100)
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-        dialog.setContentView(R.layout.dialog_settings)
-        val switchTypeEnterTime = dialog.findViewById<Switch>(R.id.switch_type_time)
-        switchTypeEnterTime.isChecked = presenter.getInputTypeTime()
-        switchTypeEnterTime.setOnClickListener {
-            presenter.changeTypeEnterTime(switchTypeEnterTime.isChecked)
-        }
-
-        var language: String = "Русский"
-
-        val spinnerLanguage = dialog.findViewById<Spinner>(R.id.spinner_language)
-        val listLanguage = listOf("Русский", "English")
-        val arrayAdapter = ArrayAdapter(this, R.layout.spinner_row, R.id.text_row, listLanguage)
-        spinnerLanguage.adapter = arrayAdapter
-        spinnerLanguage.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                log("Выбран ${listLanguage[p2]} язык")
-            }
-
-            override fun onNothingSelected(p0: AdapterView<*>?) {}
-
-        }
-        dialog.show()
     }
 
     private fun showCreateCustomTaskDialog() {
@@ -441,7 +406,7 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
             minuteFromCalendar = 0
             dialog.dismiss()
 
-            updateListTask()
+            presenter.updateListTask(currentStateList)
         }
 
         noButton.setOnClickListener {

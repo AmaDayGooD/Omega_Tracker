@@ -12,16 +12,13 @@ class DividerHolder(private val itemView: View, private val listener: OnItemClic
 
     private val binding = ItemDividerBinding.bind(itemView)
 
-    fun onBindView(dividerModel: UiModel.DividerModel) = with(binding) {
+    fun onBindView() = with(binding) {
         textShowOther.setOnClickListener {
             var result = listener.onClickItemChange()
-            Log.d("MyLog","onBind $result")
             if (result) {
-                Log.d("MyLog","now $result")
                 titleDay.setText(R.string.today)
                 textShowOther.setText(R.string.show_all)
             } else {
-                Log.d("MyLog","all $result")
                 titleDay.setText(R.string.all)
                 textShowOther.setText(R.string.show_today)
             }

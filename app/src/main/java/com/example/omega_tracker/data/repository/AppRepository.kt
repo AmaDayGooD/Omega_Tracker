@@ -45,7 +45,7 @@ class AppRepository @Inject constructor(
             val taskFromApi = convertAppDataTaskFromTask(dataFromApi)
 
             taskFromApi.addAll(onlyCustomTask)
-            //emit(taskFromApi)
+            emit(taskFromApi)
         }
     }
 

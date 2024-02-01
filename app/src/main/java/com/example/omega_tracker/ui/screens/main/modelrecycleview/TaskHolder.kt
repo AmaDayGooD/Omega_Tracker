@@ -7,6 +7,7 @@ import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.omega_tracker.databinding.ItemTasksBinding
+import com.example.omega_tracker.entity.Task
 import com.example.omega_tracker.service.ForegroundService
 import com.example.omega_tracker.ui.screens.startTask.StartTaskActivity
 import com.example.omega_tracker.utils.FormatTime
@@ -14,21 +15,21 @@ import com.example.omega_tracker.utils.FormatTime
 class TaskHolder(private val itemView: View, private val listener: OnItemClickListener) : RecyclerView.ViewHolder(itemView) {
     private val binding = ItemTasksBinding.bind(itemView)
     private val formatTime = FormatTime
-    fun onBindView(itemTask: UiModel.TaskModel) = with(binding) {
-        textNameTask.text = itemTask.task.summary
-        textNameProject.text = itemTask.task.nameProject
-        textCurrentState.text = itemTask.task.currentState
-        textTimeTask.text = formatTime.formatSeconds(itemTask.task.remainingTime)
+    fun onBindView(itemTask: Task) = with(binding) {
+        textNameTask.text = itemTask.summary
+        textNameProject.text = itemTask.nameProject
+        textCurrentState.text = itemTask.currentState
+        textTimeTask.text = formatTime.formatSeconds(itemTask.remainingTime)
 
-        if (itemTask.task.nameProject.length > 10 || textCurrentState.text.length > 10) {
+        if (itemTask.nameProject.length > 10 || textCurrentState.text.length > 10) {
             layoutNameProjectAndState.orientation = LinearLayout.VERTICAL
         } else layoutNameProjectAndState.orientation = LinearLayout.HORIZONTAL
 
         // Получение оставшегося времени в минутах на задачу
-        val timeLeft = itemTask.task.remainingTime // Времени осталось
+        val timeLeft = itemTask.remainingTime // Времени осталось
 
         // Перевод в дату
-        val dataMills = itemTask.task.onset
+        val dataMills = itemTask.onset
         if (dataMills != null) {
             if (timeLeft.isNegative()) {
                 textTimeTask.setTextColor(Color.RED)
@@ -41,12 +42,12 @@ class TaskHolder(private val itemView: View, private val listener: OnItemClickLi
         buttonIconPlay.setOnClickListener {
             itemView.context.startForegroundService(
                 ForegroundService.startTimerService(
-                    itemView.context, itemTask.task
+                    itemView.context, itemTask
                 )
             )
 
             Toast.makeText(
-                itemView.context, "Запустил задачу ${itemTask.task.summary}", Toast.LENGTH_SHORT
+                itemView.context, "Запустил задачу ${itemTask.summary}", Toast.LENGTH_SHORT
             ).show()
         }
 
@@ -54,7 +55,7 @@ class TaskHolder(private val itemView: View, private val listener: OnItemClickLi
         layoutItemList.setOnClickListener {
             itemView.context.startActivity(
                 StartTaskActivity.createIntentStartTask(
-                    itemView.context, itemTask.task.id
+                    itemView.context, itemTask.id
                 )
             )
         }

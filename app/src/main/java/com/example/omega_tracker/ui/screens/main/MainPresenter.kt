@@ -15,7 +15,6 @@ import com.example.omega_tracker.data.local_data.TasksDao
 import com.example.omega_tracker.entity.Task
 import com.example.omega_tracker.service.ForegroundService
 import com.example.omega_tracker.ui.base_class.BasePresenter
-import com.example.omega_tracker.ui.screens.main.modelrecycleview.DividerHolder
 import com.example.omega_tracker.ui.screens.main.modelrecycleview.MultiViewAdapter
 import com.example.omega_tracker.ui.screens.main.modelrecycleview.UiModel
 import com.example.omega_tracker.utils.FormatTime
@@ -29,7 +28,7 @@ class MainPresenter(
     private val token: String,
     private val settings: Settings,
     private val adapter: MultiViewAdapter
-) :BasePresenter<MainView>() {
+) : BasePresenter<MainView>() {
 
     init {
         OmegaTrackerApp.appComponent!!.inject(this)
@@ -40,6 +39,7 @@ class MainPresenter(
 
     @Inject
     lateinit var dataBaseTasks: TasksDao
+
     @Inject
     lateinit var formatTime: FormatTime
 
@@ -54,6 +54,7 @@ class MainPresenter(
     private var idTask = ""
     private var titleTask = ""
 
+    var stateList: Boolean = false
 
     // Восстановление запущенных задач
     // после выгрузки приложения из памяти
@@ -106,7 +107,8 @@ class MainPresenter(
                         }
                         val index = listRunningTask.indexOfFirst { it.id == idTask }
                         listRunningTask[index] = runningTask
-                        viewState.updateListRunningTask(listRunningTask)
+                        viewState.updateRunningTask(runningTask)
+                        //viewState.updateListRunningTask(listRunningTask)
                     }
                 }
             }
@@ -115,8 +117,6 @@ class MainPresenter(
         override fun onServiceDisconnected(name: ComponentName?) {
         }
     }
-
-    var listNotRunningTask = mutableListOf<UiModel>()
 
     fun getNotRunningTask() {
         launch {
@@ -137,7 +137,17 @@ class MainPresenter(
 
     fun setProfile() {
         val profile = settings.getProfile()
+        log("profile.avatar ${profile.avatar}")
         viewState.loadImageProfile(Uri.parse("https://aleksandr152.youtrack.cloud${profile.avatar}"))
+    }
+
+    fun updateListTask(currentStateList: Boolean) {
+        stateList = currentStateList
+        if (currentStateList) {
+            viewState.loadCurrentDataTasks()
+        } else {
+            viewState.loadAllTasks()
+        }
     }
 
     private fun launchLoadCurrentDate() {
@@ -160,33 +170,20 @@ class MainPresenter(
 
     // Получение из БД задач на СЕГОДНЯ и отображение в recycleView
     fun loadCurrentDataTask(adapter: MultiViewAdapter, onFirst: Boolean): Boolean {
-        var localOnFirst = onFirst
         launch {
             viewState.restoreLoadBar()
             withContext(Dispatchers.IO) {
                 appRepository.getAllTasks(token).collect { result ->
-
-                    val uiModelList: MutableList<UiModel> = mutableListOf()
                     withContext(Dispatchers.Main) {
                         list = checkCurrentDateItem(result)
                         list = removeRunningTask(list)
-
-                        list.forEach {
-                            uiModelList.add(UiModel.TaskModel(it))
-                        }
-                        if (localOnFirst) {
-                            adapter.setData(uiModelList)
-                            localOnFirst = false
-                        } else {
-                            adapter.updateListTasks(uiModelList, listNotRunningTask)
-                        }
-
-                        viewState.removeLoadBar()
+                        val res = mutableListOf<Any>()
+                        res.addAll(list)
+                        adapter.setData(res)
                     }
                 }
-                getNotRunningTask()
-                viewState.removeLoadBar()
             }
+            viewState.removeLoadBar()
         }
         return false
     }
@@ -208,31 +205,19 @@ class MainPresenter(
     }
 
     fun loadAllTasks(adapter: MultiViewAdapter, onFirst: Boolean = true): Boolean {
-        var localOnFirst = onFirst
         launch {
             viewState.restoreLoadBar()
             withContext(Dispatchers.IO) {
                 appRepository.getAllTasks(token).collect { result ->
-                    val uiModelList: MutableList<UiModel> = mutableListOf()
                     withContext(Dispatchers.Main) {
                         list = removeRunningTask(result)
-
-                        list.forEach {
-                            uiModelList.add(UiModel.TaskModel(it))
-                        }
-
-                        if (localOnFirst) {
-                            adapter.setData(uiModelList)
-                            localOnFirst = false
-                        } else {
-                            adapter.updateListTasks(uiModelList)
-                        }
-                        viewState.removeLoadBar()
+                        var res = mutableListOf<Any>()
+                        res.addAll(list)
+                        adapter.setData(res)
                     }
                 }
-                getNotRunningTask()
-                viewState.removeLoadBar()
             }
+            viewState.removeLoadBar()
         }
         return true
     }
@@ -251,7 +236,7 @@ class MainPresenter(
         launch {
             withContext(Dispatchers.IO) {
                 appRepository.updateTaskStatus(id, newStatus)
-                viewState.updateListTask()
+                updateListTask(stateList)
             }
         }
     }

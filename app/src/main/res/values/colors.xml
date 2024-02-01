@@ -32,5 +32,6 @@
     <color name="transparent">#00FFFFFF</color>
     <color name="light_green">#3DFF00</color>
     <color name="milk_pink">#F5EEFC</color>
-    <color name="semitransparent_Purple">#67BF9DDE</color>
+    <color name="semitransparent_Purple">#9FBF9DDE</color>
+    <color name="semi_transparent_gray">#07AEADAE</color>
 </resources>

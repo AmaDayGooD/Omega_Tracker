@@ -11,15 +11,14 @@ class RunningTaskHolder(private val itemView: View, private val listener: OnItem
     RecyclerView.ViewHolder(itemView) {
 
     private val binding = ItemRunningTaskBinding.bind(itemView)
-    fun onBindView(task: UiModel.RunningTaskModel) = with(binding) {
-        textCurrentTimeTask.text = task.runningTask.timeLeft
-        textNameCurrentTask.text = task.runningTask.summary
+    fun onBindView(task: RunningTask) = with(binding) {
+        textCurrentTimeTask.text = task.timeLeft
+        textNameCurrentTask.text = task.summary
 
         cardviewStartTask.setOnClickListener {
             itemView.context.startActivity(
-                StartTaskActivity.createIntentStartTask(itemView.context, task.runningTask.id)
+                StartTaskActivity.createIntentStartTask(itemView.context, task.id)
             )
         }
     }
-
 }

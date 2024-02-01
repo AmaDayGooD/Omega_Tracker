@@ -20,7 +20,7 @@ interface MainView : BaseView {
     fun removeNotRunningTask(notRunningTask: RunningTask)
 
     @MoxyViewCommand(StrategyType.ADD_TO_END_SINGLE)
-    fun updateListRunningTask(listRunningTask: MutableList<RunningTask>)
+    fun updateRunningTask(listRunningTask: RunningTask)
 
     @MoxyViewCommand(StrategyType.SINGLE)
     fun loadCurrentDataTasks()
@@ -43,6 +43,6 @@ interface MainView : BaseView {
     @MoxyViewCommand(StrategyType.ADD_TO_END)
     fun restoreLoadBar()
 
-    @MoxyViewCommand(StrategyType.ADD_TO_END_SINGLE)
-    fun updateListTask()
+//    @MoxyViewCommand(StrategyType.ADD_TO_END_SINGLE)
+//    fun updateListTask()
 }
