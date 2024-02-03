@@ -6,7 +6,7 @@ import retrofit2.http.*
 
 interface YouTrackApi {
     @Headers("Accept: application/json")
-    @GET("api/issues?fields=id,summary,description,project(name,shortName),customFields(value(minutes,name),minutes,name,id,projectCustomField(field(value())))")
+    @GET("api/issues?fields=id,summary,description,project(name,shortName,iconUrl),customFields(value(minutes,name),minutes,name,id,projectCustomField(field(value())))")
     suspend fun getAllInfo(@Header("Authorization") token: String): MutableList<AllData>
 
     @Headers("Accept: application/json")
@@ -19,7 +19,7 @@ interface YouTrackApi {
     suspend fun getUserOne(@Header("Authorization") token: String?): UserBody
 
     @Headers("Accept: application/json")
-    @GET("api/issues/{id}?fields=id,summary,description,project(name,shortName),customFields(value(minutes,name),minutes,name,id,projectCustomField(field(value())))")
+    @GET("api/issues/{id}?fields=id,summary,description,project(name,shortName,iconUrl),customFields(value(minutes,name),minutes,name,id,projectCustomField(field(value())))")
     suspend fun getUserById(
         @Header("Authorization") token: String,
         @Path("id") id: String?

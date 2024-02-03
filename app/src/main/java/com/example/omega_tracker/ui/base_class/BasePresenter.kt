@@ -2,6 +2,7 @@ package com.example.omega_tracker.ui.base_class
 
 
 import com.example.omega_tracker.data.local_data.Settings
+import com.example.omega_tracker.data.repository.AppRepository
 import com.omega_r.base.mvp.presenters.OmegaPresenter
 import com.omega_r.base.mvp.views.OmegaView
 import kotlinx.coroutines.Dispatchers

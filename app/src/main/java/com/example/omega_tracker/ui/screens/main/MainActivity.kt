@@ -15,7 +15,6 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
-import android.view.ViewGroup
 import android.view.Window
 import android.widget.*
 import android.widget.RelativeLayout.LayoutParams
@@ -30,9 +29,10 @@ import com.example.omega_tracker.databinding.ActivityMainBinding
 import com.example.omega_tracker.entity.Task
 import com.example.omega_tracker.service.ForegroundService
 import com.example.omega_tracker.ui.base_class.BaseActivity
-import com.example.omega_tracker.ui.screens.Profile.ProfileActivity.Companion.createIntentProfile
+import com.example.omega_tracker.ui.screens.profile.ProfileActivity.Companion.createIntentProfile
 import com.example.omega_tracker.ui.screens.authorization.AuthorizationActivity
 import com.example.omega_tracker.ui.screens.main.modelrecycleview.*
+import com.example.omega_tracker.ui.screens.statistics.StatisticsActivity.Companion.createIntentStatisticsActivity
 import com.github.twocoffeesoneteam.glidetovectoryou.GlideToVectorYou
 import com.github.twocoffeesoneteam.glidetovectoryou.GlideToVectorYouListener
 import com.omega_r.libs.omegaintentbuilder.utils.ExtensionUtils.Companion.isNullOrLessZero
@@ -45,8 +45,7 @@ import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 
 class MainActivity : BaseActivity(R.layout.activity_main), MainView,
-    DatePickerDialog.OnDateSetListener,
-    TimePickerDialog.OnTimeSetListener, OnItemClickListener {
+    DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener, OnItemClickListener {
 
     companion object {
         fun createIntentMainActivity(context: Context): Intent {
@@ -90,8 +89,7 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
         setContentView(binding.root)
 
         presenter.setProfile()
-        dialogLoading =
-            Dialog(this)
+        dialogLoading = Dialog(this)
         nameProjects = mutableListOf(getString(R.string.custom_task))
 
         binding.recycleView.layoutManager = LinearLayoutManager(this)
@@ -104,6 +102,10 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
         // Добавить кастомную задачу
         binding.buttonAddCustomTasks.setOnClickListener {
             showCreateCustomTaskDialog()
+        }
+
+        binding.buttonStatistics.setOnClickListener {
+            startActivity(createIntentStatisticsActivity(this))
         }
 
         presenter.getAllNameProjects()
@@ -146,6 +148,17 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
         return currentStateList
     }
 
+    override fun onClickRunningTask(task: Task) {
+        val intent = ForegroundService.startTimerService(this, task)
+        startForegroundService(intent)
+        presenter.updateStatus(task.id)
+        presenter.updateLaunchTime(LocalDateTime.now(), task.id)
+    }
+
+    override fun removeTask(id: String) {
+        adapter.removeTask(id)
+    }
+
     // Обновить список запущенных задач
     override fun updateRunningTask(listRunningTask: RunningTask) {
         adapter.updateRunningTask(listRunningTask)
@@ -168,16 +181,12 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
 
     // Показать изображение профиля
     override fun loadImageProfile(uri: Uri) {
-        Glide.with(this)
-            .load(uri)
-            .error(
+        Glide.with(this).load(uri).error(
                 GlideToVectorYou.init().with(this@MainActivity)
                     .withListener(object : GlideToVectorYouListener {
                         override fun onLoadFailed() {
                             Toast.makeText(
-                                this@MainActivity,
-                                "Load image failed",
-                                Toast.LENGTH_SHORT
+                                this@MainActivity, "Load image failed", Toast.LENGTH_SHORT
                             ).show()
                         }
 
@@ -189,8 +198,13 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
             ).into(binding.imageProfile)
     }
 
+    override fun getGlideToVector(): GlideToVectorYou {
+        return GlideToVectorYou.init().with(this@MainActivity)
+    }
+
     // Загрузить задачи на сегодня
     override fun loadCurrentDataTasks() {
+        log("loadCurrentDataTasks")
         presenter.loadCurrentDataTask(adapter, onFirst)
         onFirst = false
     }
@@ -201,23 +215,18 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
         onFirst = false
     }
 
-
     // Убрать анимацию загрузки
     override fun removeLoadBar() {
         if (dialogLoading.isShowing) {
             dialogLoading.dismiss()
         }
-        return
     }
 
     // Восстановить анимацию загрузки
     override fun restoreLoadBar() {
-
         dialogLoading.setContentView(R.layout.dialog_loading)
         dialogLoading.window?.setLayout(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
         dialogLoading.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-//        binding.progressBarLoading.visibility = View.VISIBLE
-//        binding.buttonSettings.isEnabled = false
         dialogLoading.show()
     }
 
@@ -418,13 +427,7 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
 
     private fun convertDateCalendarToLocalDataTime(): Long {
         val date = LocalDateTime.of(
-            yearFromCalendar,
-            month!!,
-            day!!,
-            hourFromCalendar,
-            minuteFromCalendar,
-            0,
-            0
+            yearFromCalendar, month!!, day!!, hourFromCalendar, minuteFromCalendar, 0, 0
         )
         return date.toEpochSecond(ZoneOffset.UTC) * 100
     }
@@ -459,12 +462,7 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
         monthForLabel = DateFormatSymbols().months[calendar[Calendar.MONTH]]
         day = dayOfMonth
         TimePickerDialog(
-            this,
-            R.style.TimePickerDialogTheme,
-            this,
-            hourFromCalendar,
-            minuteFromCalendar,
-            true
+            this, R.style.TimePickerDialogTheme, this, hourFromCalendar, minuteFromCalendar, true
         ).show()
     }
 
@@ -496,10 +494,6 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
 
     override fun log(message: String) {
         Log.d("MyLog", message)
-    }
-
-    override fun onClickRunningTask(item: UiModel.RunningTaskModel, position: Int) {
-        TODO("Not yet implemented")
     }
 
 

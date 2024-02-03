@@ -6,22 +6,21 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
 import android.util.Log
-import android.view.View
 import com.example.omega_tracker.OmegaTrackerApp
 import com.example.omega_tracker.R
 import com.example.omega_tracker.data.TaskStatus
 import com.example.omega_tracker.data.local_data.Settings
-import com.example.omega_tracker.data.local_data.TaskType
+import com.example.omega_tracker.data.local_data.StatisticsData
 import com.example.omega_tracker.data.repository.AppRepository
 import com.example.omega_tracker.data.local_data.TasksDao
 import com.example.omega_tracker.data.remote_data.dataclasses.*
 import com.example.omega_tracker.entity.Profile
+import com.example.omega_tracker.entity.Task
 import com.example.omega_tracker.service.ForegroundService
 import com.example.omega_tracker.service.ServiceTask
 import com.example.omega_tracker.ui.base_class.BasePresenter
 import com.example.omega_tracker.ui.screens.main.CustomTask
 import com.example.omega_tracker.utils.FormatTime
-import com.omega_r.libs.extensions.common.ifNull
 import kotlinx.coroutines.*
 import retrofit2.Retrofit
 import java.time.LocalDateTime
@@ -38,9 +37,12 @@ class StartTaskPresenter(
     private val settings: Settings
 ) : BasePresenter<StartTaskView>() {
 
+    lateinit var profile: Profile
+
     init {
         OmegaTrackerApp.appComponent!!.inject(this)
         viewState.getFormatTime(formatTime)
+        profile = settings.getProfile()
         launch {
             appRepository = AppRepository(coroutineContext, retrofit, dataBaseTasks)
 
@@ -60,7 +62,6 @@ class StartTaskPresenter(
 
     @Inject
     lateinit var formatTime: FormatTime
-    lateinit var profile: Profile
 
     private lateinit var appRepository: AppRepository
 
@@ -119,9 +120,9 @@ class StartTaskPresenter(
         }
     }
 
-    fun updateLaunchTime(timeNow: LocalDateTime, id: String) {
+    fun updateLaunchTime(id: String) {
         launch {
-            appRepository.updateTimeLaunch(timeNow, id)
+            appRepository.updateTimeLaunch(LocalDateTime.now(), id)
         }
     }
 
@@ -149,7 +150,11 @@ class StartTaskPresenter(
         return settings.getTypeEnterTime()
     }
 
-    fun postTimeSpent(result: DataForResult) {
+    fun getProfile() {
+
+    }
+
+    fun postTimeSpent(result: DataForResult, infoTask: Task) {
         launch {
             withContext(Dispatchers.IO) {
                 val postRequest = appRepository.postTimeSpent(
@@ -157,6 +162,7 @@ class StartTaskPresenter(
                 )
                 withContext(Dispatchers.Main) {
                     if (postRequest) {
+
                         viewState.showToast(
                             com.example.omega_tracker.Constants.TOAST_TYPE_SUCCESS,
                             R.string.time_sent_successfully
@@ -175,11 +181,20 @@ class StartTaskPresenter(
     ): TrackTimeBody {
         val duration = "${result.day}д${result.hour}ч${result.minute}м"
         return TrackTimeBody(
-            Duration(duration),
-            result.comment!!,
-            System.currentTimeMillis(),
-            result.idState!!,
-            Author(idProfile)
+            duration = Duration(duration),
+            text = result.comment!!,
+            date = System.currentTimeMillis(),
+            stateTask = result.idState!!,
+            author = Author(idProfile)
+        )
+    }
+
+    private fun createBodyCompletedTask(result: DataForResult, task: Task): StatisticsData {
+        return StatisticsData(
+            idTask = task.id,
+            nameTask = task.summary,
+            spentTime = "${result.day}д${result.hour}ч${result.minute}м",
+            dataCompleted = LocalDateTime.now().toString()
         )
     }
 
@@ -214,11 +229,14 @@ class StartTaskPresenter(
         }
     }
 
-    fun updateTimeCustomTask(result: DataForResult) {
+    fun updateTimeCustomTask(result: DataForResult, infoTask: Task) {
         val timeSpent = (result.day.days + result.hour.hours + result.minute.minutes)
         launch(Dispatchers.IO) {
             appRepository.updateTaskStatus(result.idTask.toString(), TaskStatus.Open)
             appRepository.updateTimeCustomTask(timeSpent, result.idTask.toString())
+
+            appRepository.insertCompletedTask(createBodyCompletedTask(result, infoTask))
+
             updateInfoTask()
         }
     }

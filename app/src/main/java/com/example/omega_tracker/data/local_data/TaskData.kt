@@ -10,9 +10,9 @@ data class TaskData(
     @PrimaryKey()
     var id_tasks:String,    // ID задачи
     var nameProject:String, // азвание проекта
+    var iconUrl:String?,
     var summary:String,     // Название задачи
     var description:String, // Описание
-    var currentTime:String, // Сколько прошло времени в данный момент
     var currentState:String,// Текущее состояние задачи
     val estimate:String,    // Оценка времени задачи
     val startDate:String,   // Дата и время начала задачи

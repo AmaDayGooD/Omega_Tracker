@@ -1,6 +1,5 @@
 package com.example.omega_tracker.ui.screens.main.modelrecycleview
 
-import android.util.Log
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.example.omega_tracker.data.RunningTask

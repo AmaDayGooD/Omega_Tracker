@@ -21,14 +21,14 @@ class MultiViewAdapter(private val listener: OnItemClickListener) :
 
     private var dividerIndex = 0
 
-    fun test(test: String = "ничего") {
+    private fun test(test: String = "ничего") {
         var i = 0
         log(test)
         while (i < listItem.size) {
-            log("getItemId ${getItemId(i)}")
+            //log("getItemId ${getItemId(i)}")
             i++
         }
-        log("===================================================================")
+        //log("===================================================================")
     }
 
     fun removeNotRunningTask(notRunningTask: RunningTask) {
@@ -43,7 +43,7 @@ class MultiViewAdapter(private val listener: OnItemClickListener) :
         sortList()
         notifyDataSetChanged()
 
-        log("listItem ${listItem.size}")
+        //log("listItem ${listItem.size}")
     }
 
     private var oldSize = 0
@@ -64,24 +64,19 @@ class MultiViewAdapter(private val listener: OnItemClickListener) :
             ).clear()
 
             listItem.addAll(newTaskList)
-            log("listItem $listItem")
             sortList()
             dividerIndex = listItem.indexOfFirst { it is Divider }
             newSize = listItem.size
-            //notifyDataSetChanged()
             if (oldSize < newSize) {
                 notifyItemRangeRemoved(dividerIndex, listItem.size)
             } else {
                 notifyItemRangeRemoved(newSize, oldSize)
             }
         }
-
         test("setData 3")
-
     }
 
     private fun sortList() {
-        log("before $listItem")
         listItem = listItem.reversed().distinctBy {
             when (it) {
                 is Task -> it.id
@@ -90,8 +85,6 @@ class MultiViewAdapter(private val listener: OnItemClickListener) :
                 else -> throw IllegalArgumentException("Unknown type")
             }
         }.reversed().toMutableList()
-        log("after $listItem")
-
 
         listItem.sortBy {
             when (it) {
@@ -120,6 +113,14 @@ class MultiViewAdapter(private val listener: OnItemClickListener) :
                 notifyItemChanged(position)
             }
         }
+    }
+
+    fun removeTask(id:String){
+        val position = listItem.indexOfLast { (it as Task).id == id }
+        listItem.removeAt(position)
+        sortList()
+        test("removeTask")
+        notifyDataSetChanged()
     }
 
     override fun getItemCount(): Int {

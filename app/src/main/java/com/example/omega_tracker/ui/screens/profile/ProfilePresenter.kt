@@ -1,4 +1,4 @@
-package com.example.omega_tracker.ui.screens.Profile
+package com.example.omega_tracker.ui.screens.profile
 
 import android.net.Uri
 import android.util.Log
@@ -8,10 +8,6 @@ import com.example.omega_tracker.data.local_data.TasksDao
 import com.example.omega_tracker.data.repository.AppRepository
 import com.example.omega_tracker.ui.base_class.BasePresenter
 import com.example.omega_tracker.utils.FormatTime
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.invoke
-import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import javax.inject.Inject
 

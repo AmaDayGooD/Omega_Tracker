@@ -1,4 +1,4 @@
-package com.example.omega_tracker.ui.screens.Profile
+package com.example.omega_tracker.ui.screens.profile
 
 import android.content.Context
 import android.content.Intent

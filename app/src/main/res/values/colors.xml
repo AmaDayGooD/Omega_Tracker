@@ -11,9 +11,10 @@
     <color name="mainBlack">#070417</color>
     <color name="white">#FAFAFF</color>
     <color name="mainGray">#373636</color>
-    <color name="light_Purple">#BF9DDE</color>
+    <color name="light_Purple">#F5EEFC</color>
     <color name="real_white">#FFFFFF</color>
     <color name="only_white">#ffffff</color>
+    <color name="text_task_project">#9B51E0</color>
     <color name="pink">#FD5B71</color>
     <color name="light_pink">#FFEFF1</color>
     <color name="bg_circlebutton">#E9E9FF</color>

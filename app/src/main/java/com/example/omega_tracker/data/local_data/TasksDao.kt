@@ -14,14 +14,15 @@ interface TasksDao {
     @Update
     suspend fun updateCustomTask(entity: TaskData)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertProfile(entity: ProfileData)
-
     @Query("SELECT * FROM Tasks WHERE taskStatus = 'Run' AND taskLaunchTime IS NOT NULL AND taskLaunchTime!='null'")
     suspend fun getTaskForRestore(): MutableList<TaskData>
 
     @Query("SELECT nameProject FROM Tasks Group by nameProject HAVING nameProject!='Личные задачи'")
     suspend fun getAllNameProjects(): List<String>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCompletedTask(statisticsData: StatisticsData)
+
 
     @Query("SELECT * FROM Tasks")
     suspend fun getAllTasks(): MutableList<TaskData>

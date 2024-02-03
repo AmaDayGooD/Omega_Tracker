@@ -1,5 +1,7 @@
 package com.example.omega_tracker.data
 
+import android.net.Uri
+import androidx.core.net.toUri
 import com.squareup.moshi.*
 import java.time.Instant
 import java.time.LocalDateTime
@@ -31,5 +33,9 @@ class MoshiAdapter{
     @ConvertCurrentTime
     fun currentTime(value: String): Duration {
         return value.toDouble().toInt().minutes
+    }
+    @FromJson
+    fun iconUri(value: String):Uri{
+        return value.toUri()
     }
 }

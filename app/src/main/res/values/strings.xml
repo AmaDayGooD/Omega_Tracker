@@ -54,9 +54,11 @@
     <string name="status_changed_failed">Изменить состояние не удалось</string>
     <string name="impossible_completed_task_no_internet">Невозможно завершить задачу.\nНет подключения к интернету</string>
     <string name="minimal_time">Минимальное время\nот 1 минуты</string>
-    <string name="day">д.</string>
-    <string name="hours">ч.</string>
-    <string name="minutes">м.</string>
+    <string name="d.">д.</string>
+    <string name="h.">ч.</string>
+    <string name="m.">м.</string>
+    <string name="day">День</string>
+    <string name="week">Неделя</string>
     <string name="create_custom_task">Создать свою новую задачу</string>
     <string name="label">Название</string>
     <string name="name_task">Название задачи</string>
@@ -97,4 +99,6 @@
     <string name="standert_time_entery_type">Стандартный тип ввода времени</string>
     <string name="theme">Тема</string>
     <string name="email">Email</string>
+    <string name="select_task_icon">Выбрать иконку задачи</string>
+    <string name="time_duration">Затраченное время</string>
 </resources>

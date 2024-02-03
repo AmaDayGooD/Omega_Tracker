@@ -1,5 +1,6 @@
 package com.example.omega_tracker.entity
 
+import android.net.Uri
 import com.example.omega_tracker.data.TaskStatus
 import com.example.omega_tracker.data.local_data.TaskType
 import java.time.LocalDate
@@ -12,7 +13,7 @@ interface Task {
     var description: String
     var id: String
     var nameProject: String
-    var runningTime: Duration
+    var iconUrl: Uri?
     var currentState: String
     var evaluate: Duration
     var onset: LocalDateTime?

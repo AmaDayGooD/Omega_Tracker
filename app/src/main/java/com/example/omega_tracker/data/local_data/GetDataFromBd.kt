@@ -1,6 +1,7 @@
 package com.example.omega_tracker.data.local_data
 
 import android.util.Log
+import androidx.core.net.toUri
 import com.example.omega_tracker.data.DataProfile
 import com.example.omega_tracker.data.AppDataTask
 import com.example.omega_tracker.data.TaskStatus
@@ -46,8 +47,8 @@ class GetDataFromBd @Inject constructor(
         return dataBaseTasks.getAllNameProjects()
     }
 
-    suspend fun clearDataBase() {
-        dataBaseTasks.clearDataBase()
+    suspend fun insertCompletedTask(statisticsData: StatisticsData){
+        dataBaseTasks.insertCompletedTask(statisticsData)
     }
 
     suspend fun updateTimeCustomTask(timeSpent: String, idTask: String) {
@@ -66,13 +67,17 @@ class GetDataFromBd @Inject constructor(
         dataBaseTasks.removeTask(idTask)
     }
 
+    suspend fun clearDataBase() {
+        dataBaseTasks.clearDataBase()
+    }
+
     private fun convertingOneItemFromNameEntity(result: TaskData): AppDataTask {
         return AppDataTask(
             id = result.id_tasks,
             nameProject = result.nameProject,
             summary = result.summary,
+            iconUrl = result.iconUrl?.toUri(),
             description = result.description,
-            currentTime = result.currentTime.toInt().seconds,
             currentState = result.currentState,
             estimate = result.estimate.toDouble().seconds,
             startDate = LocalDateTime.ofEpochSecond(result.startDate.toLong(), 0, ZoneOffset.UTC),
@@ -91,9 +96,9 @@ class GetDataFromBd @Inject constructor(
                 AppDataTask(
                     id = it.id_tasks,
                     nameProject = it.nameProject,
+                    iconUrl = it.iconUrl?.toUri(),
                     summary = it.summary,
                     description = it.description,
-                    currentTime = it.currentTime.toDouble().seconds,
                     currentState = it.currentState,
                     estimate = it.estimate.toDouble().seconds,
                     startDate = convertStringToLocalDataTime(it.startDate),
@@ -114,15 +119,6 @@ class GetDataFromBd @Inject constructor(
         } else {
             LocalDateTime.ofEpochSecond(string.toLong(), 0, ZoneOffset.UTC)
         }
-    }
-
-    private fun convertingDProfileDataFromAppProfile(result: ProfileData): Profile {
-        return DataProfile(
-            name = result.name,
-            id = result.idUser,
-            email = result.email,
-            avatarUrl = result.avatarUrl
-        )
     }
 
     private fun parseTaskLaunchTime(taskLaunchTime: String?): LocalDateTime? {

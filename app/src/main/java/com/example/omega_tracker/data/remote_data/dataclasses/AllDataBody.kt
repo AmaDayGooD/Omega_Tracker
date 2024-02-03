@@ -18,7 +18,9 @@ data class Project(
     @Json(name = "name")
     val name: String,
     @Json(name = "shortName")
-    val shortName: String
+    val shortName: String,
+    @Json(name ="iconUrl")
+    val iconUrl:String
 )
 
 data class CustomField(

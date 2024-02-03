@@ -1,5 +1,6 @@
 package com.example.omega_tracker.data.repository
 
+import android.util.Log
 import com.example.omega_tracker.data.AppDataTask
 import com.example.omega_tracker.data.TaskStatus
 import com.example.omega_tracker.data.local_data.*
@@ -76,6 +77,10 @@ class AppRepository @Inject constructor(
         return getDataFromApi.postTimeSpent(token, body, idTask)
     }
 
+    suspend fun insertCompletedTask(result:StatisticsData){
+        getDataFromBd.insertCompletedTask(result)
+    }
+
     suspend fun postStateTask(idTask: String, token: String, body: StateTask): Boolean {
         return getDataFromApi.postStateTask(token, body, idTask)
     }
@@ -105,9 +110,9 @@ class AppRepository @Inject constructor(
         return TaskData(
             id_tasks = customTask.idTask!!,
             nameProject = customTask.nameProject!!,
+            iconUrl = null,
             summary = customTask.summary!!,
             description = customTask.description!!,
-            currentTime = customTask.estimate!!.inWholeSeconds.toString(),
             currentState = TaskStatus.Open.toString(),
             estimate = customTask.estimate!!.inWholeSeconds.toString(),
             startDate = (customTask.startDateTime / 100).toString(),
@@ -140,9 +145,9 @@ class AppRepository @Inject constructor(
         return TaskData(
             id_tasks = oldTask.id,
             nameProject = task.nameProject.toString(),
+            iconUrl = null,
             summary = task.summary.toString(),
             description = task.description.toString(),
-            currentTime = oldTask.currentTime.inWholeSeconds.toString(),
             currentState = oldTask.currentState,
             estimate = task.estimate!!.inWholeSeconds.toString(),
             startDate = task.startDateTime.toString(),

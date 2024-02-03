@@ -1,13 +1,13 @@
 package com.example.omega_tracker.data.remote_data
 
 import android.util.Log
+import androidx.core.net.toUri
 import com.example.omega_tracker.data.DataProfile
 import com.example.omega_tracker.data.local_data.TaskData
 import com.example.omega_tracker.data.local_data.TasksDao
 import com.example.omega_tracker.data.remote_data.interfaces.YouTrackApi
 import com.example.omega_tracker.data.AppDataTask
 import com.example.omega_tracker.data.TaskStatus
-import com.example.omega_tracker.data.local_data.ProfileData
 import com.example.omega_tracker.data.local_data.TaskType
 import com.example.omega_tracker.data.remote_data.dataclasses.*
 import com.example.omega_tracker.entity.Profile
@@ -149,9 +149,9 @@ class GetDataFromApi @Inject constructor(
                 AppDataTask(
                     id = data.id,                                                                 //id
                     nameProject = data.project.name,                                              // Название проекта
+                    iconUrl = data.project.iconUrl.toUri(),
                     summary = data.summary,                                                       // Короткое описание
                     description = data.description,                                               // Описание
-                    currentTime = getCurrentTime(data.customFields[9].value.toString()),          // Текущее прошедшее время
                     currentState = getCurrentState(data.customFields[2].value.toString()),        // Текущее состояние задачи
                     estimate = getCurrentTime(data.customFields[8].value.toString()),             // Оценка задачи
                     startDate = convertStringToLocalDataTime(data.customFields[10].value.toString()),     // Дата начала задачи
@@ -176,9 +176,9 @@ class GetDataFromApi @Inject constructor(
                 AppDataTask(
                     id = it.id,                                                                 //id
                     nameProject = it.project.name,                                              // Название проекта
+                    iconUrl = it.project.iconUrl.toUri(),
                     summary = it.summary,                                                       // Короткое описание
                     description = it.description,                                               // Описание
-                    currentTime = getCurrentTime(it.customFields[9].value.toString()),          // Текущее прошедшее время
                     currentState = getCurrentState(it.customFields[2].value.toString()),        // Текущее состояние задачи
                     estimate = getCurrentTime(it.customFields[8].value.toString()),             // Оценка задачи
                     startDate = convertStringToLocalDataTime(it.customFields[10].value.toString()),     // Дата начала задачи
@@ -198,9 +198,9 @@ class GetDataFromApi @Inject constructor(
         return AppDataTask(
             id = result.id,                                                                 //id
             nameProject = result.project.name,                                              // Название проекта
+            iconUrl = result.project.iconUrl.toUri(),
             summary = result.summary,                                                       // Короткое описание
             description = result.description,                                               // Описание
-            currentTime = getCurrentTime(result.customFields[9].value.toString()),          // Текущее прошедшее время
             currentState = getCurrentState(result.customFields[2].value.toString()),        // Текущее состояние задачи
             estimate = getCurrentTime(result.customFields[8].value.toString()),             // Оценка задачи
             startDate = convertStringToLocalDataTime(result.customFields[10].value.toString()),     // Дата начала задачи
@@ -217,9 +217,9 @@ class GetDataFromApi @Inject constructor(
         return TaskData(
             id_tasks = result.id,
             nameProject = result.nameProject,
+            iconUrl = result.iconUrl.toString(),
             summary = result.summary,
             description = result.description,
-            currentTime = result.currentTime.inWholeSeconds.toString(),
             currentState = result.currentState,
             estimate = result.estimate.inWholeSeconds.toString(),
             startDate = (result.startDate?.toInstant(ZoneOffset.UTC)?.toEpochMilli())?.div(1000).toString(),
@@ -235,9 +235,9 @@ class GetDataFromApi @Inject constructor(
         return TaskData(
             id_tasks = result.id,
             nameProject = result.nameProject,
+            iconUrl = result.iconUrl.toString(),
             summary = result.summary,
             description = result.description,
-            currentTime = result.currentTime.inWholeSeconds.toString(),
             currentState = result.currentState,
             estimate = result.estimate.inWholeSeconds.toString(),
             startDate = (result.startDate?.toInstant(ZoneOffset.UTC)?.toEpochMilli())?.div(1000).toString(),

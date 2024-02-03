@@ -1,4 +1,4 @@
-package com.example.omega_tracker.ui.screens.Profile
+package com.example.omega_tracker.ui.screens.profile
 
 import android.net.Uri
 import com.example.omega_tracker.entity.Profile

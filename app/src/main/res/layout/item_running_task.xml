@@ -12,7 +12,7 @@
         android:id="@+id/cardview_start_task"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:backgroundTint="@color/white"
+        android:backgroundTint="@color/real_white"
         app:cardCornerRadius="14dp"
         app:cardElevation="0dp">
 
@@ -64,8 +64,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_weight="0"
-                android:background="@color/white"
-                android:backgroundTint="@color/white"
+                android:background="@color/real_white"
+                android:backgroundTint="@color/real_white"
                 android:drawableTop="@drawable/ic_right_arrow_foreground"
                 android:elevation="0dp"
                 android:maxWidth="40dp"

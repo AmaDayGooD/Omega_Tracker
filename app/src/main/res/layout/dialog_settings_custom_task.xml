@@ -141,7 +141,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:fontFamily="@font/rubik_regular"
-                        android:text="@string/day"
+                        android:text="@string/d."
                         android:textColor="@color/real_white"
                         android:textSize="22sp" />
                 </LinearLayout>
@@ -166,7 +166,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:fontFamily="@font/rubik_regular"
-                        android:text="@string/hours"
+                        android:text="@string/h."
                         android:textColor="@color/real_white"
                         android:textSize="22sp" />
                 </LinearLayout>
@@ -191,7 +191,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:fontFamily="@font/rubik_regular"
-                        android:text="@string/minutes"
+                        android:text="@string/m."
                         android:textColor="@color/real_white"
                         android:textSize="22sp" />
                 </LinearLayout>

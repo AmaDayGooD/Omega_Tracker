@@ -1,18 +1,25 @@
 package com.example.omega_tracker.ui.screens.main.modelrecycleview
 
 import android.graphics.Color
+import android.net.Uri
 import android.util.Log
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.example.omega_tracker.R
 import com.example.omega_tracker.databinding.ItemTasksBinding
 import com.example.omega_tracker.entity.Task
 import com.example.omega_tracker.service.ForegroundService
 import com.example.omega_tracker.ui.screens.startTask.StartTaskActivity
 import com.example.omega_tracker.utils.FormatTime
+import com.github.twocoffeesoneteam.glidetovectoryou.GlideToVectorYou
+import com.github.twocoffeesoneteam.glidetovectoryou.GlideToVectorYouListener
+import com.omega_r.libs.omegatypes.image.setImage
 
-class TaskHolder(private val itemView: View, private val listener: OnItemClickListener) : RecyclerView.ViewHolder(itemView) {
+class TaskHolder(private val itemView: View, private val listener: OnItemClickListener) :
+    RecyclerView.ViewHolder(itemView) {
     private val binding = ItemTasksBinding.bind(itemView)
     private val formatTime = FormatTime
     fun onBindView(itemTask: Task) = with(binding) {
@@ -37,18 +44,21 @@ class TaskHolder(private val itemView: View, private val listener: OnItemClickLi
             textTimeTask.text = formatTime.formatSeconds(timeLeft)
         } else textTimeTask.text = "Нет данных"
 
+        if (itemTask.iconUrl == null) {
+            imageviewIconProject.setImageResource(R.mipmap.ic_launcher)
+        } else {
+            val uri = Uri.parse("https://aleksandr152.youtrack.cloud${itemTask.iconUrl}")
+            listener.getGlideToVector()
+                .withListener(object : GlideToVectorYouListener {
+                    override fun onLoadFailed() {}
+
+                    override fun onResourceReady() {}
+                }).load(uri, imageviewIconProject)
+        }
 
         // Обработка нажатия на кнопку запуска таймера
         buttonIconPlay.setOnClickListener {
-            itemView.context.startForegroundService(
-                ForegroundService.startTimerService(
-                    itemView.context, itemTask
-                )
-            )
-
-            Toast.makeText(
-                itemView.context, "Запустил задачу ${itemTask.summary}", Toast.LENGTH_SHORT
-            ).show()
+            listener.onClickRunningTask(itemTask)
         }
 
         // обработка нажатия на item и передача данных на следующую активити

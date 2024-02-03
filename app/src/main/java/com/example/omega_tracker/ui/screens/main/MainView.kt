@@ -4,7 +4,6 @@ import android.net.Uri
 import com.example.omega_tracker.data.RunningTask
 import com.example.omega_tracker.entity.Task
 import com.example.omega_tracker.ui.base_class.BaseView
-import com.example.omega_tracker.ui.screens.main.modelrecycleview.UiModel
 import com.omegar.mvp.viewstate.strategy.MoxyViewCommand
 import com.omegar.mvp.viewstate.strategy.StrategyType
 
@@ -21,6 +20,9 @@ interface MainView : BaseView {
 
     @MoxyViewCommand(StrategyType.ADD_TO_END_SINGLE)
     fun updateRunningTask(listRunningTask: RunningTask)
+
+    @MoxyViewCommand(StrategyType.ADD_TO_END_SINGLE)
+    fun removeTask(id: String)
 
     @MoxyViewCommand(StrategyType.SINGLE)
     fun loadCurrentDataTasks()

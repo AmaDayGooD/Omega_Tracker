@@ -16,7 +16,6 @@ import com.example.omega_tracker.entity.Task
 import com.example.omega_tracker.service.ForegroundService
 import com.example.omega_tracker.ui.base_class.BasePresenter
 import com.example.omega_tracker.ui.screens.main.modelrecycleview.MultiViewAdapter
-import com.example.omega_tracker.ui.screens.main.modelrecycleview.UiModel
 import com.example.omega_tracker.utils.FormatTime
 import kotlinx.coroutines.*
 import retrofit2.Retrofit
@@ -97,8 +96,8 @@ class MainPresenter(
                             timeLeft = timeTask,
                             taskStatus = task.taskStatus.toString()
                         )
-
                         if (!idRunningTask.contains(idTask)) {
+                            log("TEST $idTask ${runningTask.summary}")
                             idRunningTask.add(idTask)
                             listRunningTask.add(runningTask)
                             viewState.addItemRunningTask(runningTask)
@@ -108,7 +107,7 @@ class MainPresenter(
                         val index = listRunningTask.indexOfFirst { it.id == idTask }
                         listRunningTask[index] = runningTask
                         viewState.updateRunningTask(runningTask)
-                        //viewState.updateListRunningTask(listRunningTask)
+
                     }
                 }
             }
@@ -137,12 +136,12 @@ class MainPresenter(
 
     fun setProfile() {
         val profile = settings.getProfile()
-        log("profile.avatar ${profile.avatar}")
         viewState.loadImageProfile(Uri.parse("https://aleksandr152.youtrack.cloud${profile.avatar}"))
     }
 
     fun updateListTask(currentStateList: Boolean) {
         stateList = currentStateList
+        log("updateListTask $currentStateList")
         if (currentStateList) {
             viewState.loadCurrentDataTasks()
         } else {
@@ -150,23 +149,11 @@ class MainPresenter(
         }
     }
 
-    private fun launchLoadCurrentDate() {
-        viewState.restoreLoadBar()
-        viewState.loadCurrentDataTasks()
-    }
-
-    // Получение всех задач из БД и отображение в recycleView
-    fun launchLoadAllTasks() {
-        viewState.restoreLoadBar()
-        viewState.loadAllTasks()
-    }
-
     fun getAllNameProjects() {
         launch(Dispatchers.IO) {
             viewState.getAllNameProjects(appRepository.getAllNameProjects())
         }
     }
-
 
     // Получение из БД задач на СЕГОДНЯ и отображение в recycleView
     fun loadCurrentDataTask(adapter: MultiViewAdapter, onFirst: Boolean): Boolean {
@@ -232,12 +219,30 @@ class MainPresenter(
         return result
     }
 
-    fun updateStatus(id: String, newStatus: TaskStatus) {
+    fun updateStatus(id: String, newStatus: TaskStatus = TaskStatus.Run) {
         launch {
             withContext(Dispatchers.IO) {
                 appRepository.updateTaskStatus(id, newStatus)
                 updateListTask(stateList)
             }
+        }
+    }
+
+    fun updateStatus(id: String) {
+        launch {
+            withContext(Dispatchers.IO) {
+                appRepository.updateTaskStatus(id, TaskStatus.Run)
+                withContext(Dispatchers.Main) {
+                    log("viewState.removeTask(id)")
+                    viewState.removeTask(id)
+                }
+            }
+        }
+    }
+
+    fun updateLaunchTime(timeNow: LocalDateTime, id: String) {
+        launch {
+            appRepository.updateTimeLaunch(timeNow, id)
         }
     }
 

@@ -136,7 +136,7 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
 
             startForegroundService(intent)
             presenter.updateStatus(infoTask.id, TaskStatus.Run)
-            presenter.updateLaunchTime(LocalDateTime.now(), infoTask.id)
+            presenter.updateLaunchTime(infoTask.id)
             infoTask.taskStatus = TaskStatus.Run
         }
 
@@ -217,6 +217,25 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
         connection = presenter.returnConnection()
         Intent(this, ForegroundService::class.java).also {
             bindService(it, connection, BIND_AUTO_CREATE)
+        }
+    }
+
+    override fun setTask(taskInfo: Task) {
+        infoTask = taskInfo
+        timeSpent = taskInfo.usedTime
+        timeLeft = taskInfo.remainingTime
+        binding.textNameProject.text = taskInfo.nameProject
+        binding.textState.text = presenter.getNameCustomField(infoTask.currentState)
+        binding.textSummaryTask.text = taskInfo.summary
+        binding.textDescriptionTask.text = taskInfo.description
+
+        presenter.setColorTextTimer(taskInfo.remainingTime)
+        binding.textCountTimeForward.text = format.formatSeconds(taskInfo.usedTime)
+        binding.textCountTimeBack.text = format.formatSeconds(taskInfo.remainingTime)
+        setProgressBarTimer(binding.circularProgressBarTimer, taskInfo)
+        if (binding.textCountTimeForward.text.isNotEmpty()) {
+            binding.buttonStartButton.isEnabled = true
+            binding.progressBarLoading.visibility = View.GONE
         }
     }
 
@@ -320,7 +339,7 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
 
                 dialog.dismiss()
             } else {
-                showToast(Constants.TOAST_TYPE_WARNING, R.string.empty_fields)
+                showToast(TOAST_TYPE_WARNING, R.string.empty_fields)
             }
 
         }
@@ -436,24 +455,7 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
         }
     }
 
-    override fun setTask(taskInfo: Task) {
-        infoTask = taskInfo
-        timeSpent = taskInfo.usedTime
-        timeLeft = taskInfo.remainingTime
-        binding.textNameProject.text = taskInfo.nameProject
-        binding.textState.text = presenter.getNameCustomField(infoTask.currentState)
-        binding.textSummaryTask.text = taskInfo.summary
-        binding.textDescriptionTask.text = taskInfo.description
 
-        presenter.setColorTextTimer(taskInfo.remainingTime)
-        binding.textCountTimeForward.text = format.formatSeconds(taskInfo.usedTime)
-        binding.textCountTimeBack.text = format.formatSeconds(taskInfo.remainingTime)
-        setProgressBarTimer(binding.circularProgressBarTimer, taskInfo)
-        if (binding.textCountTimeForward.text.isNotEmpty()) {
-            binding.buttonStartButton.isEnabled = true
-            binding.progressBarLoading.visibility = View.GONE
-        }
-    }
 
     override fun showLayoutStartButton() {
         binding.layoutOnlyStartButton.visibility = View.VISIBLE
@@ -590,7 +592,7 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
             })
             if (result.day != 0 || result.hour != 0 || result.minute != 0) {
                 // отправка данных в YouTrack
-                presenter.postTimeSpent(result)
+                presenter.postTimeSpent(result,infoTask)
                 presenter.postStateTask(result)
                 presenter.updateInfoTask()
                 presenter.updateStatus(infoTask.id, TaskStatus.Open)
@@ -704,7 +706,7 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
                 }
             }
 
-            presenter.updateTimeCustomTask(result)
+            presenter.updateTimeCustomTask(result,infoTask)
             presenter.removeTaskLaunchTime(result.idTask!!)
             binding.layoutOnlyStartButton.visibility = View.VISIBLE
             binding.layoutStartAndCompleteButton.visibility = View.GONE

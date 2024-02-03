@@ -1,6 +1,7 @@
 package com.example.omega_tracker.data
 
 
+import android.net.Uri
 import android.util.Log
 import com.example.omega_tracker.data.local_data.TaskType
 import com.example.omega_tracker.entity.Task
@@ -15,7 +16,7 @@ data class AppDataTask(
     @Json(name = "description") override var description: String,
     @Json(name = "id") override var id: String,
     @Json(name = "nameProject") override var nameProject: String,
-    @ConvertCurrentTime @Json(name = "currentTime") var currentTime: Duration,
+    @Json(name = "iconUri") override var iconUrl: Uri?,
     @Json(name = "currentState") override var currentState: String,
     @ConvertCurrentTime @Json(name = "estimate") var estimate: Duration,
     @ConvertStartDate @Json(name = "startDate") var startDate: LocalDateTime?,
@@ -30,7 +31,7 @@ data class AppDataTask(
         task.description,
         task.id,
         task.nameProject,
-        task.runningTime,
+        task.iconUrl,
         task.currentState,
         task.evaluate,
         task.onset,
@@ -40,10 +41,6 @@ data class AppDataTask(
         task.taskLaunchTime,
         task.taskType
     )
-
-    override var runningTime: Duration
-        get() = currentTime
-        set(value) {}
 
     override var evaluate: Duration
         get() = estimate
