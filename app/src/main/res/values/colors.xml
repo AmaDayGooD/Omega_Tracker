@@ -8,6 +8,7 @@
     <color name="black">#FF000000</color>
     <color name="gray">#373636</color>
     <color name="main">#9B51E0</color>
+    <color name="main_strong">#7012CE</color>
     <color name="mainBlack">#070417</color>
     <color name="white">#FAFAFF</color>
     <color name="mainGray">#373636</color>
@@ -34,5 +35,8 @@
     <color name="light_green">#3DFF00</color>
     <color name="milk_pink">#F5EEFC</color>
     <color name="semitransparent_Purple">#9FBF9DDE</color>
+    <color name="semitransparent_light_purple_25">#40E9E9FF</color>
+    <color name="semitransparent_light_purple_100">#E9E9FF</color>
     <color name="semi_transparent_gray">#07AEADAE</color>
+    <color name="semi_transparent_black">#1A000000</color>
 </resources>

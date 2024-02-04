@@ -1,13 +1,11 @@
 package com.example.omega_tracker.data.local_data
 
-import android.util.Log
 import androidx.core.net.toUri
-import com.example.omega_tracker.data.DataProfile
 import com.example.omega_tracker.data.AppDataTask
+import com.example.omega_tracker.data.DataStatistics
 import com.example.omega_tracker.data.TaskStatus
-import com.example.omega_tracker.entity.Profile
+import com.example.omega_tracker.entity.Statistics
 import com.example.omega_tracker.entity.Task
-import com.example.omega_tracker.ui.screens.main.CustomTask
 import retrofit2.Retrofit
 import java.time.LocalDateTime
 import java.time.OffsetTime
@@ -49,6 +47,10 @@ class GetDataFromBd @Inject constructor(
 
     suspend fun insertCompletedTask(statisticsData: StatisticsData){
         dataBaseTasks.insertCompletedTask(statisticsData)
+    }
+
+    suspend fun getStatisticsToDay(toDayStart:LocalDateTime,toMorrowStart:LocalDateTime):List<Statistics>{
+        return convertingStatisticsDataToStatistics(dataBaseTasks.getStatisticsToDay(toDayStart.toString(),toMorrowStart.toString()))
     }
 
     suspend fun updateTimeCustomTask(timeSpent: String, idTask: String) {
@@ -119,6 +121,22 @@ class GetDataFromBd @Inject constructor(
         } else {
             LocalDateTime.ofEpochSecond(string.toLong(), 0, ZoneOffset.UTC)
         }
+    }
+
+    private fun convertingStatisticsDataToStatistics(statisticsData:List<StatisticsData>):MutableList<Statistics>{
+        val statistics = mutableListOf<Statistics>()
+        statisticsData.forEach {
+            statistics.add(
+                DataStatistics(
+                    idTask = it.idTask,
+                    nameTask = it.nameTask,
+                    spentTime = it.spentTime,
+                    dataCompleted = it.dataCompleted
+                )
+            )
+        }
+
+        return statistics
     }
 
     private fun parseTaskLaunchTime(taskLaunchTime: String?): LocalDateTime? {

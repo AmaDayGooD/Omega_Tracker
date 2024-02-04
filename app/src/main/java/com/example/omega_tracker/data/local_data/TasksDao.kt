@@ -1,6 +1,7 @@
 package com.example.omega_tracker.data.local_data
 
 import androidx.room.*
+import java.time.LocalDateTime
 import kotlin.time.Duration
 
 @Dao
@@ -23,6 +24,8 @@ interface TasksDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCompletedTask(statisticsData: StatisticsData)
 
+    @Query("SELECT * FROM Statistics WHERE dataCompleted BETWEEN :toDayStart AND :toMorrowStart")
+    suspend fun getStatisticsToDay(toDayStart: String, toMorrowStart: String): List<StatisticsData>
 
     @Query("SELECT * FROM Tasks")
     suspend fun getAllTasks(): MutableList<TaskData>

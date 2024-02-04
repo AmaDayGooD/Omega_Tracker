@@ -15,7 +15,7 @@ class Settings(context: Context) {
         private const val KEY_FOR_PROFILE_ID = "KEY_FOR_PROFILE_ID"
         private const val KEY_FOR_PROFILE_EMAIL = "KEY_FOR_PROFILE_EMAIL"
         private const val KEY_FOR_PROFILE_AVATAR_URI = "KEY_FOR_PROFILE_AVATAR_URI"
-
+        private const val KEY_FOR_CURRENT_DISPLAY_CHART = "KEY_FOR_CURRENT_DISPLAY_CHART"
     }
 
     private val sharedPreferences =
@@ -59,6 +59,15 @@ class Settings(context: Context) {
     fun getTypeEnterTime(): Boolean {
         return sharedPreferences.getBoolean(KEY_FOR_TYPE_ENTER_TIME, false)
     }
+
+    fun saveCurrentDisplay(value: Boolean){
+        sharedPreferences.edit().putBoolean(KEY_FOR_CURRENT_DISPLAY_CHART, value).apply()
+    }
+
+    fun getCurrentDisplay():Boolean{
+        return sharedPreferences.getBoolean(KEY_FOR_CURRENT_DISPLAY_CHART,false)
+    }
+
 
     fun getToken(): String? {
         return sharedPreferences.getString(KEY_FOR_TOKEN, "")

@@ -23,7 +23,7 @@ class MultiViewAdapter(private val listener: OnItemClickListener) :
 
     private fun test(test: String = "ничего") {
         var i = 0
-        log(test)
+        //log(test)
         while (i < listItem.size) {
             //log("getItemId ${getItemId(i)}")
             i++

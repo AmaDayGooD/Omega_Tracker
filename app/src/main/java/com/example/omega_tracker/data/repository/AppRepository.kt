@@ -9,6 +9,7 @@ import com.example.omega_tracker.data.remote_data.dataclasses.StateBundleElement
 import com.example.omega_tracker.data.remote_data.dataclasses.StateTask
 import com.example.omega_tracker.data.remote_data.dataclasses.TrackTimeBody
 import com.example.omega_tracker.entity.Profile
+import com.example.omega_tracker.entity.Statistics
 import com.example.omega_tracker.entity.Task
 import com.example.omega_tracker.ui.screens.main.CustomTask
 import kotlinx.coroutines.CoroutineScope
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import retrofit2.Retrofit
 import java.time.LocalDateTime
+import java.time.LocalTime
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -35,7 +37,6 @@ class AppRepository @Inject constructor(
     suspend fun getTaskForRestore(): List<Task> {
         return getDataFromBd.getTaskForRestore()
     }
-
     suspend fun getAllTasks(token: String): Flow<MutableList<Task>?> = flow {
         val dataFromBD = getDataFromBd.getAllTaskBd()
         emit(dataFromBD)
@@ -105,6 +106,12 @@ class AppRepository @Inject constructor(
         dataBaseTasks.updateTimeLaunch(timeNow.toString(), idTask)
     }
 
+    suspend fun getStatisticsToDay():List<Statistics>{
+        val toDayStart = LocalDateTime.now().with(LocalTime.MIN)
+        val toMorrowStart = toDayStart.plusDays(1)
+        return getDataFromBd.getStatisticsToDay(toDayStart,toMorrowStart)
+    }
+
 
     private fun convertCustomTaskForTaskData(customTask: CustomTask): TaskData {
         return TaskData(
@@ -157,5 +164,9 @@ class AppRepository @Inject constructor(
             taskType = oldTask.taskType,
             taskLaunchTime = null
         )
+    }
+
+    private suspend fun convertStatisticsToAppStatistics(statisticsData: StatisticsData){
+
     }
 }
