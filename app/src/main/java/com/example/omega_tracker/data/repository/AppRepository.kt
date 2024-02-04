@@ -112,6 +112,9 @@ class AppRepository @Inject constructor(
         return getDataFromBd.getStatisticsToDay(toDayStart,toMorrowStart)
     }
 
+    suspend fun getStatisticsToWeek(toDayStartWeek:LocalDateTime,toDayEndWeek:LocalDateTime):List<Statistics>{
+       return getDataFromBd.getStatisticsToWeek(toDayStartWeek,toDayEndWeek)
+    }
 
     private fun convertCustomTaskForTaskData(customTask: CustomTask): TaskData {
         return TaskData(

@@ -9,7 +9,11 @@ import com.example.omega_tracker.entity.Statistics
 import com.example.omega_tracker.ui.base_class.BasePresenter
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
+import java.time.DayOfWeek
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.time.temporal.TemporalAdjusters
+import java.util.*
 import javax.inject.Inject
 
 class StatisticsPresenter(private val settings:Settings) : BasePresenter<StatisticsView>() {
@@ -26,8 +30,6 @@ class StatisticsPresenter(private val settings:Settings) : BasePresenter<Statist
         appRepository = AppRepository(coroutineContext, retrofit, dataBaseTasks)
     }
 
-
-
     fun saveCurrentDisplay(value:Boolean){
         settings.saveCurrentDisplay(value)
     }
@@ -36,30 +38,65 @@ class StatisticsPresenter(private val settings:Settings) : BasePresenter<Statist
         return settings.getCurrentDisplay()
     }
 
-    fun getStatisticsForDay(){
+    fun showStatistics(currentDisplay:Boolean){
+        if (currentDisplay){
+            getStatisticsToWeek()
+        }
+        else{
+            getStatisticsForDay()
+        }
+    }
+
+    private fun getStatisticsForDay(){
         launch {
             val result = appRepository.getStatisticsToDay()
             viewState.setCurrentStatistics(calculateHourlyStatistics(result))
+        }
+    }
+
+    private fun getStatisticsToWeek(){
+        val today = LocalDateTime.now()
+        val startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).withHour(0).withMinute(0).withSecond(0).withNano(0)
+        val endOfWeek = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY)).withHour(23).withMinute(59).withSecond(0).withNano(0)
+        launch{
+           val result = appRepository.getStatisticsToWeek(startOfWeek,endOfWeek)
+            viewState.setCurrentStatistics(calculateWeeklyStatistics(result))
         }
     }
     private fun calculateHourlyStatistics(statisticsList: List<Statistics>): Map<String, Float> {
         val hourlyStatistics = mutableMapOf<String, Float>()
 
         val formatter = DateTimeFormatter.ofPattern("HH:00")
-
-        for (statistic in statisticsList) {
-            val hourKey = statistic.dataTimeCompleted.format(formatter)
-            val spentTimeInMinutes = statistic.duration.inWholeMinutes
-            hourlyStatistics[hourKey] = (hourlyStatistics.getOrDefault(hourKey, 0f) + spentTimeInMinutes)
+        statisticsList.forEach {
+            val hourKey = it.dataTimeCompleted.format(formatter)
+            val spentTimeInMinutes = it.duration.inWholeMinutes
+            hourlyStatistics[hourKey] =
+                (hourlyStatistics.getOrDefault(hourKey, 0f) + spentTimeInMinutes)
         }
 
-        for(hour in 8..17){
+        for (hour in 8..17) {
             val hourKey = String.format("%02d:00", hour)
             hourlyStatistics.putIfAbsent(hourKey, 0f)
         }
-        val sortedHourlyStatistics = hourlyStatistics.toSortedMap(compareBy { it })
-        log("$sortedHourlyStatistics")
-        return sortedHourlyStatistics
+        return hourlyStatistics.toSortedMap(compareBy { it })
+    }
+
+    private fun calculateWeeklyStatistics(statisticsList: List<Statistics>): Map<String, Float> {
+        val weeklyStatistics = mutableMapOf<String, Float>()
+
+        // Добавляем все дни недели в словарь с начальным значением 0
+        val daysOfWeek = listOf("ПН", "ВТ", "СР", "ЧТ", "ПТ")
+        daysOfWeek.forEach { day ->
+            weeklyStatistics[day] = 0f
+        }
+
+        val formatter = DateTimeFormatter.ofPattern("EEE", Locale("ru"))
+        statisticsList.forEach { statistic ->
+            val dayKey = statistic.dataTimeCompleted.format(formatter).uppercase(Locale.ROOT)
+            val spentTimeInMinutes = statistic.duration.inWholeMinutes.toFloat()
+            weeklyStatistics[dayKey] = weeklyStatistics.getOrDefault(dayKey, 0f) + spentTimeInMinutes
+        }
+        return weeklyStatistics
     }
 
     private fun log(message:String){

@@ -27,6 +27,9 @@ interface TasksDao {
     @Query("SELECT * FROM Statistics WHERE dataCompleted BETWEEN :toDayStart AND :toMorrowStart")
     suspend fun getStatisticsToDay(toDayStart: String, toMorrowStart: String): List<StatisticsData>
 
+    @Query("SELECT * FROM Statistics WHERE dataCompleted BETWEEN :toDayStartWeek AND :toDayEndWeek")
+    suspend fun getStatisticsToWeek(toDayStartWeek:String,toDayEndWeek:String):List<StatisticsData>
+
     @Query("SELECT * FROM Tasks")
     suspend fun getAllTasks(): MutableList<TaskData>
 

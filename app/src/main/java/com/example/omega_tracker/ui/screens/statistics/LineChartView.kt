@@ -19,6 +19,8 @@ class LineChartView(context: Context, attrs: AttributeSet) : View(context, attrs
     private val listCoordinates = mutableListOf<Pair<Float, Float>>()
     private var lastY = 0f
     private var indexPoint = 0
+    private var typeView: Boolean = false
+    private var stepY :Float = 30f
 
     // Paint для рисования графика
     private val paint = Paint().apply {
@@ -26,6 +28,7 @@ class LineChartView(context: Context, attrs: AttributeSet) : View(context, attrs
         strokeWidth = 5f
         isAntiAlias = true
     }
+
     // Paint's для рисования текста
     private val paintTextXCoordinates = Paint().apply {
         strokeWidth = 4f
@@ -81,19 +84,28 @@ class LineChartView(context: Context, attrs: AttributeSet) : View(context, attrs
         listenerMyProductivity = listener
     }
 
-    fun setData(dataX: List<String>, dataY: List<Float>) {
+    fun setData(dataX: List<String>, dataY: List<Float>, displayType: Boolean) {
+        listCoordinates.clear()
+        typeView = displayType
+        stepY = 30f
+        if(typeView){
+            stepY = 60f
+        }
         mDataX = dataX
         mDataY = dataY
         invalidate()
     }
 
-    fun getResultOnClick(): String {
-        return "Hello,World!!!"
-    }
-
     private fun setHorizontalScroll(offset: Float) {
-        val maxOffset = max(0f, width.toFloat() - 76f)
+//        var maxOffset = max(0f, width.toFloat() - 76f) // нормальынй максимальный оффсет для реального телефона
+        var maxOffset = max(0f, width.toFloat() - 26f)
+        // если FALSE то показывается статистика за неделю, иначе статистика за день
+        if(typeView){
+            //maxOffset = max(0f, width.toFloat())-560f  // нормальынй оффсет для реального телефона
+            maxOffset = max(0f, width.toFloat())-400f
+        }
         horizontalOffset = max(0f, min(offset, maxOffset))
+
         invalidate()
     }
 
@@ -111,12 +123,12 @@ class LineChartView(context: Context, attrs: AttributeSet) : View(context, attrs
         val labelMargin = 150f // Ширина фиксированной области для меток по оси Y
 
         val maxY = mDataY.maxOrNull() ?: 0f
-        val intervals = ((maxY / 30) + 2).toInt()
+        val intervals = ((maxY / stepY) + 2).toInt()
         val intervalHeight = (height - 100) / intervals
 
         // Отрисовка меток по оси Y
         for (i in 0..intervals) {
-            val label = formatTime(i * 30)
+            val label = formatTime(i * stepY.toInt())
             val yCoord = (height - 100 - i * intervalHeight) - margin
             canvas.drawText(label, 0f + margin, yCoord, paintTextYCoordinates)
             canvas.drawLine(width - 30f, yCoord, labelMargin, yCoord, paintHorisontalLine)
@@ -130,7 +142,7 @@ class LineChartView(context: Context, attrs: AttributeSet) : View(context, attrs
             val xCoord =
                 ((labelMargin - margin) + i * xStep - horizontalOffset) + 20f //5f для сопоставления точки на графике и подписи
             val label = mDataX[i]
-            canvas.drawText(label, xCoord, height - 50, paintTextXCoordinates)
+            canvas.drawText(label, xCoord+50f, height - 50, paintTextXCoordinates)
         }
 
         // Отрисовка графика
@@ -151,25 +163,21 @@ class LineChartView(context: Context, attrs: AttributeSet) : View(context, attrs
         paint.strokeWidth = 10f
         path.reset()
         for (i in mDataY.indices) {
-            val xCoord = labelMargin + i * xStep - horizontalOffset
-            val yCoord = height - 100 - mDataY[i] * intervalHeight / 30
-
-            // ПРОБЛЕМА рисуется очень много точек, вместо переданных в класс (передано 10 в итоге отрисоваано 900)
-            // возможно нужно использовать какой то другой Scroll
-
+            val xCoord = (labelMargin + i * xStep - horizontalOffset)+50f
+            val yCoord = height - 120 - mDataY[i] * intervalHeight / stepY
             listCoordinates.add(Pair(xCoord - horizontalOffset, yCoord + horizontalOffset))
             if (i == 0) {
                 path.moveTo(xCoord, yCoord)
             } else {
                 val prevX = labelMargin + (i - 1) * xStep - horizontalOffset
-                val prevY = height - 100 - mDataY[i - 1] * intervalHeight / 30
+                val prevY = height - 120 - mDataY[i - 1] * intervalHeight / stepY
                 val cx = (prevX + xCoord) / 2
                 path.cubicTo(cx, prevY, cx, yCoord, xCoord, yCoord)
             }
         }
 
         points.let {
-            if (points != null && indexPoint<mDataX.size) {
+            if (points != null && indexPoint < mDataX.size) {
                 // Рисуем тень на выбранном времени
                 paintShadow.shader = LinearGradient(
                     (points!!.first - 50f) - horizontalOffset,
@@ -235,7 +243,7 @@ class LineChartView(context: Context, attrs: AttributeSet) : View(context, attrs
             }
             MotionEvent.ACTION_UP -> {
                 if (onPress) {
-                    listCoordinates.forEachIndexed { index ,(x, y) ->
+                    listCoordinates.forEachIndexed { index, (x, y) ->
                         if (event.x + horizontalOffset in (x - 40)..(x + 40) && event.y in (y - 40)..(y + 40)) {
                             points = Pair(x, y)
                             indexPoint = index

@@ -27,7 +27,8 @@ class StatisticsActivity() : BaseActivity(R.layout.activity_statistics), Statist
 
     private lateinit var binding: ActivityStatisticsBinding
 
-
+    private var listX: MutableList<String> = mutableListOf()
+    private var listY: MutableList<Float> = mutableListOf()
     private var currentStatistics: Map<String, Float> = mapOf()
     private var currentDisplay: Boolean = false
 
@@ -44,67 +45,36 @@ class StatisticsActivity() : BaseActivity(R.layout.activity_statistics), Statist
         chart.setListener(this)
 
         switchDayAndWeek = binding.switchTypeDisplay
-
-        if (currentDisplay) {
-            // показываем неделю
-            log("Неделя")
-        } else {
-            // Показываем день
-            log("День")
-            presenter.getStatisticsForDay()
-            showChartDay()
-        }
-
-
-//        initChart()
+        currentDisplay = presenter.getCurrentDisplay()
+        switchDayAndWeek.isChecked = currentDisplay
+        presenter.showStatistics(currentDisplay)
 
         switchDayAndWeek.setOnClickListener {
             presenter.saveCurrentDisplay(switchDayAndWeek.isChecked)
             currentDisplay = presenter.getCurrentDisplay()
-        }
+            presenter.showStatistics(currentDisplay)
 
+        }
 
         binding.buttonBack.setOnClickListener {
             finish()
         }
     }
 
-    private fun showChartDay() {
-
-    }
-
-    var listX: MutableList<String> = mutableListOf()
-    var listY: MutableList<Float> = mutableListOf()
-    private fun initChart() {
-        listX = mutableListOf<String>(
-            "8:00",
-            "9:00",
-            "10:00",
-            "11:00",
-            "12:00",
-            "13:00",
-            "14:00",
-            "15:00",
-            "16:00",
-            "17:00"
-        )
-        listY = mutableListOf<Float>(45f, 10f, 67f, 42f, 0f, 10f, 60f, 42f, 25f, 45f, 0f)
-        chart.setData(listX, listY)
-    }
-
     override fun setCurrentStatistics(statistics: Map<String, Float>) {
-        currentStatistics = statistics
-        statistics.forEach{ (str, lon) ->
+        listX.clear()
+        listY.clear()
+        statistics.forEach { (str, lon) ->
             listX.add(str)
             listY.add(lon)
-            chart.setData(listX, listY)
+            chart.setData(listX, listY, currentDisplay)
         }
+        binding.numberOfCompletedTask.text = statistics.size.toString()
     }
-
 
 
     override fun getCurrentPosition(position: Int) {
-        if (position < listY.size-1){
+        if (position < listY.size - 1) {
             binding.textviewTimeSpent.text = listY[position].toString()
         }
     }

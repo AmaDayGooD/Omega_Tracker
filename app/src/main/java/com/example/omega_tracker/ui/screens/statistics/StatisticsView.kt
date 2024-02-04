@@ -8,6 +8,6 @@ import com.omegar.mvp.viewstate.strategy.StateStrategyType
 import com.omegar.mvp.viewstate.strategy.StrategyType
 
 interface StatisticsView:BaseView {
-    @MoxyViewCommand(StrategyType.ADD_TO_END)
+    @MoxyViewCommand(StrategyType.SINGLE)
     fun setCurrentStatistics(statistics: Map<String, Float>)
 }

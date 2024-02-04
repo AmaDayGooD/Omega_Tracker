@@ -53,6 +53,10 @@ class GetDataFromBd @Inject constructor(
         return convertingStatisticsDataToStatistics(dataBaseTasks.getStatisticsToDay(toDayStart.toString(),toMorrowStart.toString()))
     }
 
+    suspend fun getStatisticsToWeek(toDayStartWeek:LocalDateTime,toDayEndWeek:LocalDateTime):List<Statistics>{
+        return convertingStatisticsDataToStatistics(dataBaseTasks.getStatisticsToWeek(toDayStartWeek.toString(),toDayEndWeek.toString()))
+    }
+
     suspend fun updateTimeCustomTask(timeSpent: String, idTask: String) {
         dataBaseTasks.updateTimeCustomTask(timeSpent, idTask)
     }
