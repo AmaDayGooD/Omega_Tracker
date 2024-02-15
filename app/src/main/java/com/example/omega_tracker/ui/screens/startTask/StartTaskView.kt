@@ -13,7 +13,6 @@ import com.omegar.mvp.viewstate.strategy.StrategyType
 import kotlin.time.Duration
 
 interface StartTaskView : BaseView {
-
     @MoxyViewCommand(StrategyType.ADD_TO_END_SINGLE)
     fun getFormatTime(formatTime: FormatTime)
 

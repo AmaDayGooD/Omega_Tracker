@@ -7,7 +7,12 @@ import com.omegar.mvp.viewstate.strategy.MoxyViewCommand
 import com.omegar.mvp.viewstate.strategy.StateStrategyType
 import com.omegar.mvp.viewstate.strategy.StrategyType
 
-interface StatisticsView:BaseView {
+interface StatisticsView : BaseView {
     @MoxyViewCommand(StrategyType.SINGLE)
     fun setCurrentStatistics(statistics: Map<String, Float>)
+    @MoxyViewCommand(StrategyType.ADD_TO_END)
+    fun setTimeSpent(value: Float)
+
+    @MoxyViewCommand(StrategyType.ADD_TO_END_SINGLE)
+    fun setNumberOfCompletedTasks(number:Int)
 }

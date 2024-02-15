@@ -87,6 +87,7 @@
     <string name="change_task">Изменить задачу</string>
     <string name="remove_task">Удалить задачу</string>
     <string name="are_you_sure_delete_task">Вы уверены, что хотите удалить задачу?</string>
+    <string name="are_you_sure_to_log_out_of_your_profile">Вы уверены, что хотите выйти из вашего профиля?</string>
     <string name="сonfirmation">Подтверждение</string>
     <string name="yes">Да</string>
     <string name="no">Нет</string>
@@ -101,4 +102,7 @@
     <string name="email">Email</string>
     <string name="select_task_icon">Выбрать иконку задачи</string>
     <string name="time_duration">Затраченное время</string>
+    <string name="youtrack">YouTrack</string>
+    <string name="drums">Барабаны</string>
+    <string name="pending_task_sent">Ожидающее задачи отправлены</string>
 </resources>

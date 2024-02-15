@@ -45,6 +45,5 @@ interface MainView : BaseView {
     @MoxyViewCommand(StrategyType.ADD_TO_END)
     fun restoreLoadBar()
 
-//    @MoxyViewCommand(StrategyType.ADD_TO_END_SINGLE)
-//    fun updateListTask()
+
 }

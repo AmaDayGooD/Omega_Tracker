@@ -5,7 +5,7 @@ import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
-import android.util.Log
+import com.example.omega_tracker.Constants
 import com.example.omega_tracker.OmegaTrackerApp
 import com.example.omega_tracker.R
 import com.example.omega_tracker.data.TaskStatus
@@ -47,7 +47,6 @@ class StartTaskPresenter(
             appRepository = AppRepository(coroutineContext, retrofit, dataBaseTasks)
 
             appRepository.getTaskById(id, token).collect { task ->
-                Log.d("MyLog", "${task.taskType} ${task.summary} ")
                 viewState.setVisibleButtonSettings(task.taskType)
                 viewState.setTask(task)
             }
@@ -92,7 +91,7 @@ class StartTaskPresenter(
                         } else {
                             viewState.showLayoutStartButton()
                         }
-                        timer(time)
+                        showTimer(time)
                     }
                 }
             }
@@ -134,11 +133,11 @@ class StartTaskPresenter(
             Dispatchers.Main {
                 if (successfully) {
                     viewState.showToast(
-                        com.example.omega_tracker.Constants.TOAST_TYPE_SUCCESS,
+                        Constants.TOAST_TYPE_SUCCESS,
                         R.string.status_changed_successfully
                     )
                 } else viewState.showToast(
-                    com.example.omega_tracker.Constants.TOAST_TYPE_ERROR,
+                    Constants.TOAST_TYPE_ERROR,
                     R.string.status_changed_failed
                 )
 
@@ -146,33 +145,45 @@ class StartTaskPresenter(
         }
     }
 
+
     fun getTypeEnterTime(): Boolean {
         return settings.getTypeEnterTime()
     }
 
-    fun getProfile() {
-
-    }
-
-    fun postTimeSpent(result: DataForResult, infoTask: Task) {
+    fun postTimeSpent(result: DataForResult,infoTask: Task) {
         launch {
             withContext(Dispatchers.IO) {
+                val postTimeBody = createBodyPostTimeStent(profile.id, result)
                 val postRequest = appRepository.postTimeSpent(
-                    result.idTask!!, result.token!!, createBodyPostTimeStent(profile.id, result)
+                    result.idTask!!, result.token!!, postTimeBody
                 )
+                appRepository.insertCompletedTask(createBodyCompletedTask(result, infoTask))
                 withContext(Dispatchers.Main) {
-                    if (postRequest) {
-
-                        viewState.showToast(
-                            com.example.omega_tracker.Constants.TOAST_TYPE_SUCCESS,
+                    when (postRequest) {
+                        0 -> viewState.showToast(
+                            Constants.TOAST_TYPE_SUCCESS,
                             R.string.time_sent_successfully
                         )
-                    } else viewState.showToast(
-                        com.example.omega_tracker.Constants.TOAST_TYPE_ERROR,
-                        R.string.error_try_later
-                    )
+                        1 -> {
+                            insertPendingTask(postTimeBody)
+                            viewState.showToast(
+                                Constants.TOAST_TYPE_ERROR,
+                                R.string.no_internet
+                            )
+                        }
+                        2 -> viewState.showToast(
+                            Constants.TOAST_TYPE_ERROR,
+                            R.string.error_try_later
+                        )
+                    }
                 }
             }
+        }
+    }
+
+    private fun insertPendingTask(trackTimeBody: TrackTimeBody) {
+        launch {
+            appRepository.insertPendingTask(idTask,trackTimeBody)
         }
     }
 
@@ -193,7 +204,7 @@ class StartTaskPresenter(
         return StatisticsData(
             idTask = task.id,
             nameTask = task.summary,
-            spentTime = "${result.day}д${result.hour}ч${result.minute}м",
+            spentTime = "${result.day}d${result.hour}h${result.minute}m",
             dataCompleted = LocalDateTime.now().toString()
         )
     }
@@ -214,8 +225,8 @@ class StartTaskPresenter(
         return string.substringAfter("=").substringBefore(",")
     }
 
-    fun timer(text: ServiceTask) {
-        viewState.checkVisibleTextTimer(text)
+    fun showTimer(serviceTask: ServiceTask) {
+        viewState.checkVisibleTextTimer(serviceTask)
     }
 
     fun setColorTextTimer(timeLeft: Duration) {
@@ -244,14 +255,6 @@ class StartTaskPresenter(
     fun removeTaskLaunchTime(id: String) {
         launch {
             appRepository.removeTaskLaunchTime(id)
-        }
-    }
-
-    fun currentStateTask(id: String) {
-        launch {
-            appRepository.getTaskById(id, token).collect {
-                viewState.setCurrentTaskStatus(it.taskStatus)
-            }
         }
     }
 

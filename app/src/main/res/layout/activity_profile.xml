@@ -7,15 +7,43 @@
     android:orientation="vertical"
     tools:context=".ui.screens.profile.ProfileActivity">
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginVertical="15dp"
-        android:fontFamily="@font/rubik_semibold"
-        android:text="@string/profile"
-        android:textAlignment="center"
-        android:textColor="@color/black"
-        android:textSize="30sp" />
+        android:orientation="horizontal"
+        android:weightSum="10">
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/button_back"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            app:cardCornerRadius="10dp"
+            app:cardElevation="0dp">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@color/real_white"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_arrow_back_foreground" />
+
+        </androidx.cardview.widget.CardView>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="15dp"
+            android:layout_weight="17"
+            android:fontFamily="@font/rubik_semibold"
+            android:text="@string/profile"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textSize="30sp" />
+
+    </LinearLayout>
+
 
     <ImageView
         android:id="@+id/image_profile"
@@ -78,28 +106,65 @@
         android:textColor="@color/black"
         android:textSize="30sp" />
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="5dp"
+        android:fontFamily="@font/rubik_regular"
+        android:text="Тип ввода времени"
+        android:textColor="@color/light_gray"
+        android:textSize="24sp" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="15dp"
+        android:layout_marginStart="25dp"
+        android:layout_marginEnd="15dp"
         android:orientation="horizontal"
         android:weightSum="10">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
+            android:layout_weight="8"
             android:fontFamily="@font/rubik_regular"
-            android:text="@string/standert_time_entery_type"
+            android:text="@string/youtrack"
             android:textColor="@color/black"
             android:textSize="24sp" />
 
-        <Switch
-            android:id="@+id/switch_type_time"
+        <RadioButton
+            android:id="@+id/radiobutton_drums"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:buttonTint="@color/main" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="25dp"
+        android:layout_marginEnd="15dp"
+        android:orientation="horizontal"
+        android:weightSum="10">
+
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="8" />
+            android:layout_weight="8"
+            android:fontFamily="@font/rubik_regular"
+            android:text="@string/drums"
+            android:textColor="@color/black"
+            android:textSize="24sp" />
+
+        <RadioButton
+            android:id="@+id/radiobutton_youtrack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:buttonTint="@color/main" />
     </LinearLayout>
+
 
 </LinearLayout>

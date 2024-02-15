@@ -32,18 +32,18 @@ class MultiViewAdapter(private val listener: OnItemClickListener) :
     }
 
     fun removeNotRunningTask(notRunningTask: RunningTask) {
-
         val allRunningTask = listItem.slice(0 until dividerIndex).toMutableList()
-
+        if(allRunningTask.isEmpty())
+            return
+        log("before $allRunningTask")
         allRunningTask.remove(notRunningTask)
-
+        log("after $allRunningTask")
         listItem.subList(0, dividerIndex - 1).clear()
         listItem.addAll(allRunningTask)
         test("removeNotRunningTask")
         sortList()
         notifyDataSetChanged()
 
-        //log("listItem ${listItem.size}")
     }
 
     private var oldSize = 0

@@ -11,11 +11,12 @@ import com.example.omega_tracker.utils.FormatTime
 import retrofit2.Retrofit
 import javax.inject.Inject
 
-class ProfilePresenter(private val token: String, private val settings: Settings) :
+class ProfilePresenter(private val settings: Settings) :
     BasePresenter<ProfileView>() {
     init {
         OmegaTrackerApp.appComponent!!.inject(this)
         getProfile()
+        viewState.setStateRadioButton(settings.getTypeEnterTime())
     }
 
     @Inject
@@ -34,5 +35,13 @@ class ProfilePresenter(private val token: String, private val settings: Settings
         Log.d("MyLog", "profile $profile")
         viewState.loadImageProfile(Uri.parse("https://aleksandr152.youtrack.cloud${profile.avatar}"))
         viewState.setProfile(profile)
+    }
+
+    fun changeTypeEnterTime(value:Boolean){
+        settings.changeTypeEnterTime(value)
+    }
+
+    fun getTypeEnterTime():Boolean{
+        return settings.getTypeEnterTime()
     }
 }

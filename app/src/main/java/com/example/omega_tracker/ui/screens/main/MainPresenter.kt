@@ -6,7 +6,6 @@ import android.net.Uri
 import android.os.IBinder
 import android.util.Log
 import com.example.omega_tracker.OmegaTrackerApp
-import com.example.omega_tracker.data.DataProfile
 import com.example.omega_tracker.data.RunningTask
 import com.example.omega_tracker.data.repository.AppRepository
 import com.example.omega_tracker.data.local_data.Settings
@@ -42,7 +41,6 @@ class MainPresenter(
     @Inject
     lateinit var formatTime: FormatTime
 
-    private var profile: DataProfile? = null
     private var appRepository = AppRepository(coroutineContext, retrofit, dataBaseTasks)
     private var list: MutableList<Task> = mutableListOf()
 
@@ -53,13 +51,18 @@ class MainPresenter(
     private var idTask = ""
     private var titleTask = ""
 
-    var stateList: Boolean = false
+    private var stateList: Boolean = false
+
+    init {
+        getAllNameProjects()
+        getTaskForRestore()
+    }
 
     // Восстановление запущенных задач
     // после выгрузки приложения из памяти
     fun getTaskForRestore() {
         launch {
-            loadCurrentDataTask(adapter, true)
+            loadCurrentDataTask(adapter)
 
             val result = appRepository.getTaskForRestore()
             result.forEach {
@@ -97,7 +100,6 @@ class MainPresenter(
                             taskStatus = task.taskStatus.toString()
                         )
                         if (!idRunningTask.contains(idTask)) {
-                            log("TEST $idTask ${runningTask.summary}")
                             idRunningTask.add(idTask)
                             listRunningTask.add(runningTask)
                             viewState.addItemRunningTask(runningTask)
@@ -107,7 +109,6 @@ class MainPresenter(
                         val index = listRunningTask.indexOfFirst { it.id == idTask }
                         listRunningTask[index] = runningTask
                         viewState.updateRunningTask(runningTask)
-
                     }
                 }
             }
@@ -117,11 +118,16 @@ class MainPresenter(
         }
     }
 
+    fun resendPendingTask() {
+        launch {
+            appRepository.resendPendingTask(token)
+        }
+    }
+
     fun getNotRunningTask() {
         launch {
             listRunningTask.forEach { task ->
                 val answerTask = appRepository.getTaskFromBdById(task.id)
-
                 if (answerTask.taskStatus != TaskStatus.Run) {
                     viewState.removeNotRunningTask(task)
                 }
@@ -141,7 +147,6 @@ class MainPresenter(
 
     fun updateListTask(currentStateList: Boolean) {
         stateList = currentStateList
-        log("updateListTask $currentStateList")
         if (currentStateList) {
             viewState.loadCurrentDataTasks()
         } else {
@@ -156,7 +161,7 @@ class MainPresenter(
     }
 
     // Получение из БД задач на СЕГОДНЯ и отображение в recycleView
-    fun loadCurrentDataTask(adapter: MultiViewAdapter, onFirst: Boolean): Boolean {
+    fun loadCurrentDataTask(adapter: MultiViewAdapter): Boolean {
         launch {
             viewState.restoreLoadBar()
             withContext(Dispatchers.IO) {
@@ -164,13 +169,13 @@ class MainPresenter(
                     withContext(Dispatchers.Main) {
                         list = checkCurrentDateItem(result)
                         list = removeRunningTask(list)
-                        val res = mutableListOf<Any>()
-                        res.addAll(list)
-                        adapter.setData(res)
+                        val result = mutableListOf<Any>()
+                        result.addAll(list)
+                        adapter.setData(result)
+                        viewState.removeLoadBar()
                     }
                 }
             }
-            viewState.removeLoadBar()
         }
         return false
     }
@@ -191,20 +196,20 @@ class MainPresenter(
         return currentDataItem
     }
 
-    fun loadAllTasks(adapter: MultiViewAdapter, onFirst: Boolean = true): Boolean {
+    fun loadAllTasks(adapter: MultiViewAdapter): Boolean {
         launch {
             viewState.restoreLoadBar()
             withContext(Dispatchers.IO) {
                 appRepository.getAllTasks(token).collect { result ->
                     withContext(Dispatchers.Main) {
                         list = removeRunningTask(result)
-                        var res = mutableListOf<Any>()
-                        res.addAll(list)
-                        adapter.setData(res)
+                        val result = mutableListOf<Any>()
+                        result.addAll(list)
+                        adapter.setData(result)
+                        viewState.removeLoadBar()
                     }
                 }
             }
-            viewState.removeLoadBar()
         }
         return true
     }
@@ -267,14 +272,9 @@ class MainPresenter(
         settings.deleteProfile()
     }
 
-    fun changeTypeEnterTime(value: Boolean) {
-        settings.changeTypeEnterTime(value)
-    }
-
     fun getInputTypeTime(): Boolean {
         return settings.getTypeEnterTime()
     }
-
 
     private fun log(message: String) {
         Log.d("MyLog", message)

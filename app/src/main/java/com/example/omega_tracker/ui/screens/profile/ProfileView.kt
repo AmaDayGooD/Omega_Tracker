@@ -13,4 +13,6 @@ interface ProfileView:BaseView {
 
     @MoxyViewCommand(StrategyType.ADD_TO_END_SINGLE)
     fun setProfile(profile: Profile)
+    @MoxyViewCommand(StrategyType.ADD_TO_END)
+    fun setStateRadioButton(state:Boolean)
 }

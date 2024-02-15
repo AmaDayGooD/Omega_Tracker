@@ -1,14 +1,14 @@
 package com.example.omega_tracker.ui.screens.main
 
+import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.Dialog
 import android.app.TimePickerDialog
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
+import android.content.*
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.icu.text.DateFormatSymbols
+import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
@@ -45,12 +45,19 @@ import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 
 class MainActivity : BaseActivity(R.layout.activity_main), MainView,
-    DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener, OnItemClickListener {
+    DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener, OnItemClickListener,
+    ReceiverCallBack {
+
+    var t = 0
 
     companion object {
         fun createIntentMainActivity(context: Context): Intent {
             return Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        }
+
+        fun test() {
+            Log.d("MyLog", "AHHAHHAHHAHAHHA")
         }
     }
 
@@ -76,7 +83,7 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
     private lateinit var nameProjects: MutableList<String>
 
     private lateinit var connection: ServiceConnection
-
+    private lateinit var networkChangeReceiver: NetworkChangeReceiver
     private var currentStateList = true
     private var onFirst = true
 
@@ -108,8 +115,14 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
             startActivity(createIntentStatisticsActivity(this))
         }
 
-        presenter.getAllNameProjects()
-        presenter.getTaskForRestore()
+        networkChangeReceiver = NetworkChangeReceiver(this)
+    }
+
+
+    override fun resendingTask(result: Boolean) {
+        if (result) {
+            presenter.resendPendingTask()
+        }
     }
 
     override fun onStart() {
@@ -120,9 +133,18 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        unregisterReceiver(networkChangeReceiver)
+    }
+
 
     override fun onResume() {
         super.onResume()
+        registerReceiver(
+            networkChangeReceiver,
+            IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+        )
         presenter.updateListTask(currentStateList)
         presenter.getNotRunningTask()
     }
@@ -182,20 +204,20 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
     // Показать изображение профиля
     override fun loadImageProfile(uri: Uri) {
         Glide.with(this).load(uri).error(
-                GlideToVectorYou.init().with(this@MainActivity)
-                    .withListener(object : GlideToVectorYouListener {
-                        override fun onLoadFailed() {
-                            Toast.makeText(
-                                this@MainActivity, "Load image failed", Toast.LENGTH_SHORT
-                            ).show()
-                        }
+            GlideToVectorYou.init().with(this@MainActivity)
+                .withListener(object : GlideToVectorYouListener {
+                    override fun onLoadFailed() {
+                        Toast.makeText(
+                            this@MainActivity, "Load image failed", Toast.LENGTH_SHORT
+                        ).show()
+                    }
 
-                        override fun onResourceReady() {
-                            Toast.makeText(this@MainActivity, "Image ready", Toast.LENGTH_SHORT)
-                                .show()
-                        }
-                    }).load(uri, binding.imageProfile)
-            ).into(binding.imageProfile)
+                    override fun onResourceReady() {
+                        Toast.makeText(this@MainActivity, "Image ready", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                }).load(uri, binding.imageProfile)
+        ).into(binding.imageProfile)
     }
 
     override fun getGlideToVector(): GlideToVectorYou {
@@ -204,14 +226,13 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
 
     // Загрузить задачи на сегодня
     override fun loadCurrentDataTasks() {
-        log("loadCurrentDataTasks")
-        presenter.loadCurrentDataTask(adapter, onFirst)
+        presenter.loadCurrentDataTask(adapter)
         onFirst = false
     }
 
     // Загрузить все задачи
     override fun loadAllTasks() {
-        presenter.loadAllTasks(adapter, onFirst)
+        presenter.loadAllTasks(adapter)
         onFirst = false
     }
 
@@ -239,15 +260,12 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
     private fun openPopupMenu(popupMenu: PopupMenu) {
         popupMenu.setOnMenuItemClickListener { item ->
             when (item.itemId) {
-                R.id.exitUser -> {
-                    showToast(Constants.TOAST_TYPE_INFO, R.string.come_out)
-                    presenter.deleteToken()
-                    presenter.clearDataBase()
-                    gotoAuth()
-                    true
-                }
                 R.id.settings -> {
                     startActivity(createIntentProfile(this))
+                    true
+                }
+                R.id.exitUser -> {
+                    showAlertDialog()
                     true
                 }
                 else -> false
@@ -287,7 +305,14 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
 
             try {
                 termYouTrack.addTextChangedListener(object : TextWatcher {
-                    override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+                    override fun beforeTextChanged(
+                        p0: CharSequence?,
+                        p1: Int,
+                        p2: Int,
+                        p3: Int
+                    ) {
+                    }
+
                     override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
                     override fun afterTextChanged(p0: Editable?) {
                         val input = p0.toString()
@@ -348,11 +373,11 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
 
         }
 
-        val arrayAdapter = ArrayAdapter(this, R.layout.spinner_row, R.id.text_row, nameProjects!!)
+        val arrayAdapter = ArrayAdapter(this, R.layout.spinner_row, R.id.text_row, nameProjects)
         spinnerProjects.adapter = arrayAdapter
         spinnerProjects.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                projectName = nameProjects!![p2]
+                projectName = nameProjects[p2]
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {}
@@ -378,7 +403,7 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
 
         yesButton.setOnClickListener {
             if (inputType) {
-                if (termYouTrack.text.toString().isNullOrEmpty()) {
+                if (termYouTrack.text.toString().isNullOrEmpty() || hourFromCalendar == 0) {
                     showToast(Constants.TOAST_TYPE_WARNING, R.string.fill_all_fields)
                     return@setOnClickListener
                 }
@@ -427,7 +452,13 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
 
     private fun convertDateCalendarToLocalDataTime(): Long {
         val date = LocalDateTime.of(
-            yearFromCalendar, month!!, day!!, hourFromCalendar, minuteFromCalendar, 0, 0
+            yearFromCalendar,
+            month!!,
+            day!!,
+            hourFromCalendar,
+            minuteFromCalendar,
+            0,
+            0
         )
         return date.toEpochSecond(ZoneOffset.UTC) * 100
     }
@@ -455,6 +486,28 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
         return charPool.shuffled().take(length).toSet().joinToString("")
     }
 
+    private fun showAlertDialog() {
+        val builder = AlertDialog.Builder(this)
+
+        builder.setTitle(getString(R.string.сonfirmation))
+        builder.setMessage(getString(R.string.are_you_sure_to_log_out_of_your_profile))
+
+        builder.setPositiveButton(getString(R.string.yes)) { dialogInterface: DialogInterface, i: Int ->
+
+            presenter.deleteToken()
+            presenter.clearDataBase()
+            gotoAuth()
+            dialogInterface.dismiss()
+        }
+
+        builder.setNegativeButton(getString(R.string.no)) { dialogInterface: DialogInterface, i: Int ->
+            dialogInterface.dismiss()
+        }
+
+        val alertDialog: AlertDialog = builder.create()
+        alertDialog.show()
+    }
+
     override fun onDateSet(view: DatePicker?, year: Int, monthOfYear: Int, dayOfMonth: Int) {
         val calendar = Calendar.getInstance()
         calendar[Calendar.MONTH] = monthOfYear
@@ -462,7 +515,12 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
         monthForLabel = DateFormatSymbols().months[calendar[Calendar.MONTH]]
         day = dayOfMonth
         TimePickerDialog(
-            this, R.style.TimePickerDialogTheme, this, hourFromCalendar, minuteFromCalendar, true
+            this,
+            R.style.TimePickerDialogTheme,
+            this,
+            hourFromCalendar,
+            minuteFromCalendar,
+            true
         ).show()
     }
 
@@ -495,6 +553,5 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
     override fun log(message: String) {
         Log.d("MyLog", message)
     }
-
 
 }

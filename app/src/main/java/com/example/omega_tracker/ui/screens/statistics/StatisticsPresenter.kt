@@ -16,7 +16,7 @@ import java.time.temporal.TemporalAdjusters
 import java.util.*
 import javax.inject.Inject
 
-class StatisticsPresenter(private val settings:Settings) : BasePresenter<StatisticsView>() {
+class StatisticsPresenter(private val settings: Settings) : BasePresenter<StatisticsView>() {
 
     @Inject
     lateinit var retrofit: Retrofit
@@ -24,45 +24,67 @@ class StatisticsPresenter(private val settings:Settings) : BasePresenter<Statist
     @Inject
     lateinit var dataBaseTasks: TasksDao
 
-    private var appRepository:AppRepository
+    private var appRepository: AppRepository
+
     init {
         OmegaTrackerApp.appComponent!!.inject(this)
         appRepository = AppRepository(coroutineContext, retrofit, dataBaseTasks)
+        launch {
+            showStatistics(getCurrentDisplay())
+        }
     }
 
-    fun saveCurrentDisplay(value:Boolean){
+    fun saveCurrentDisplay(value: Boolean) {
         settings.saveCurrentDisplay(value)
     }
 
-    fun getCurrentDisplay():Boolean{
+    fun getCurrentDisplay(): Boolean {
         return settings.getCurrentDisplay()
     }
 
-    fun showStatistics(currentDisplay:Boolean){
-        if (currentDisplay){
+    fun showStatistics(currentDisplay: Boolean) {
+        if (currentDisplay) {
             getStatisticsToWeek()
-        }
-        else{
+        } else {
             getStatisticsForDay()
         }
     }
 
-    private fun getStatisticsForDay(){
+    private fun getStatisticsForDay() {
         launch {
             val result = appRepository.getStatisticsToDay()
+            log("result ${calculateHourlyStatistics(result)}")
+            getSumSpentTime(result)
+            viewState.setNumberOfCompletedTasks(result.size)
             viewState.setCurrentStatistics(calculateHourlyStatistics(result))
         }
     }
 
-    private fun getStatisticsToWeek(){
+    private fun getSumSpentTime(listStatistics: List<Statistics>) {
+        var sumSpentTime = 0f
+        listStatistics.forEach {
+            sumSpentTime += it.duration.inWholeMinutes.toFloat()
+        }
+        viewState.setTimeSpent(sumSpentTime)
+    }
+
+    private fun getStatisticsToWeek() {
         val today = LocalDateTime.now()
-        val startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).withHour(0).withMinute(0).withSecond(0).withNano(0)
-        val endOfWeek = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY)).withHour(23).withMinute(59).withSecond(0).withNano(0)
-        launch{
-           val result = appRepository.getStatisticsToWeek(startOfWeek,endOfWeek)
+        val startOfWeek =
+            today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).withHour(0).withMinute(0)
+                .withSecond(0).withNano(0)
+        val endOfWeek =
+            today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY)).withHour(23).withMinute(59)
+                .withSecond(0).withNano(0)
+        log("startOfWeek $startOfWeek || endOfWeek $endOfWeek")
+        launch {
+            val result = appRepository.getStatisticsToWeek(startOfWeek, endOfWeek)
+            getSumSpentTime(result)
+            viewState.setNumberOfCompletedTasks(result.size)
             viewState.setCurrentStatistics(calculateWeeklyStatistics(result))
         }
     }
+
     private fun calculateHourlyStatistics(statisticsList: List<Statistics>): Map<String, Float> {
         val hourlyStatistics = mutableMapOf<String, Float>()
 
@@ -94,12 +116,13 @@ class StatisticsPresenter(private val settings:Settings) : BasePresenter<Statist
         statisticsList.forEach { statistic ->
             val dayKey = statistic.dataTimeCompleted.format(formatter).uppercase(Locale.ROOT)
             val spentTimeInMinutes = statistic.duration.inWholeMinutes.toFloat()
-            weeklyStatistics[dayKey] = weeklyStatistics.getOrDefault(dayKey, 0f) + spentTimeInMinutes
+            weeklyStatistics[dayKey] =
+                weeklyStatistics.getOrDefault(dayKey, 0f) + spentTimeInMinutes
         }
         return weeklyStatistics
     }
 
-    private fun log(message:String){
-        Log.d("MyLog","$message")
+    private fun log(message: String) {
+        Log.d("MyLog", "$message")
     }
 }

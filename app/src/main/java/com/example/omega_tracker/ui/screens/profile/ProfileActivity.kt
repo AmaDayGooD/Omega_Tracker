@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.widget.RadioButton
 import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.example.omega_tracker.R
@@ -25,16 +26,38 @@ class ProfileActivity : BaseActivity(R.layout.activity_profile), ProfileView {
 
     lateinit var binding: ActivityProfileBinding
 
+    lateinit var radioButtonDrums: RadioButton
+    lateinit var radioButtonYouTrack: RadioButton
     override val presenter: ProfilePresenter by providePresenter {
-        ProfilePresenter(getToken()!!, Settings(this))
+        ProfilePresenter(Settings(this))
     }
-
-    var themeIsLight = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        binding.buttonBack.setOnClickListener {
+            finish()
+        }
+
+        radioButtonDrums = binding.radiobuttonDrums
+        radioButtonYouTrack = binding.radiobuttonYoutrack
+        radioButtonDrums.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                presenter.changeTypeEnterTime(true)
+                radioButtonDrums.isChecked = true
+                radioButtonYouTrack.isChecked = !radioButtonDrums.isChecked
+            }
+        }
+        radioButtonYouTrack.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                presenter.changeTypeEnterTime(false)
+                radioButtonYouTrack.isChecked = true
+                radioButtonDrums.isChecked = !radioButtonYouTrack.isChecked
+                log("YouTrack")
+            }
+        }
 
     }
 
@@ -64,5 +87,10 @@ class ProfileActivity : BaseActivity(R.layout.activity_profile), ProfileView {
     override fun setProfile(profile: Profile) {
         binding.userName.text = profile.name
         binding.email.text = profile.email
+    }
+
+    override fun setStateRadioButton(state: Boolean) {
+        radioButtonDrums.isChecked = state
+        radioButtonYouTrack.isChecked = !radioButtonDrums.isChecked
     }
 }

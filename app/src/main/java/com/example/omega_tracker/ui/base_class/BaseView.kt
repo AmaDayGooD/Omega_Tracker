@@ -8,7 +8,6 @@ interface BaseView : OmegaView {
 
     @MoxyViewCommand(StrategyType.SKIP)
     fun showToast(toastType: Int, message: Int)
-
     @MoxyViewCommand(StrategyType.SKIP)
     fun log(message: String)
 }

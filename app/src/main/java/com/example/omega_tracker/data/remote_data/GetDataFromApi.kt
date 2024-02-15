@@ -94,26 +94,26 @@ class GetDataFromApi @Inject constructor(
         return list
     }
 
-    suspend fun postTimeSpent(token: String?, body: TrackTimeBody, idTask: String): Boolean {
+    suspend fun postTimeSpent(token: String?, body: TrackTimeBody, idTask: String): Int {
         try {
             apiInterface.postTimeSpent(token, body, idTask)
         } catch (e: IllegalArgumentException) {
             e.printStackTrace()
-            return false
+            return 2
         } catch (e: IllegalStateException) {
             e.printStackTrace()
-            return false
+            return 2
         } catch (e: RuntimeException) {
             e.printStackTrace()
-            return false
+            return 2
         } catch (e: UnknownHostException) {
             e.printStackTrace()
-            return false
+            return 1 // нет интернета
         } catch (e: Exception) {
             e.printStackTrace()
-            return false
+            return 2 // просто произошла какая то ошибка
         }
-        return true
+        return 0
     }
 
     suspend fun postStateTask(token: String?, body: StateTask, idTask: String): Boolean {

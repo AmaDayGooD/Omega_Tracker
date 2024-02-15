@@ -24,6 +24,9 @@ class Settings(context: Context) {
     fun saveString(value: String) {
         sharedPreferences.edit().putString(KEY_FOR_TOKEN, value).apply()
     }
+    fun test(){
+        sharedPreferences
+    }
 
     fun saveProfile(profile: Profile) {
         sharedPreferences.edit()

@@ -16,7 +16,7 @@ import com.omega_r.base.mvp.views.OmegaView
 import com.omegar.mvp.MvpAppCompatActivity
 import com.omegar.mvp.MvpPresenter
 
-abstract class BaseActivity : OmegaActivity,BaseView {
+abstract class BaseActivity : OmegaActivity, BaseView {
 
     constructor() : super()
 

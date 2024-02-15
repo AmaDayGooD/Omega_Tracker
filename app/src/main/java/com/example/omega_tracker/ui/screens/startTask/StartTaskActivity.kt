@@ -2,12 +2,10 @@ package com.example.omega_tracker.ui.screens.startTask
 
 import android.Manifest
 import android.app.*
-import android.content.Context
-import android.content.DialogInterface
-import android.content.Intent
-import android.content.ServiceConnection
+import android.content.*
 import android.graphics.Typeface
 import android.icu.text.DateFormatSymbols
+import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
@@ -39,6 +37,8 @@ import com.example.omega_tracker.service.ForegroundService.Companion.stopTimerSe
 import com.example.omega_tracker.service.ServiceTask
 import com.example.omega_tracker.ui.base_class.BaseActivity
 import com.example.omega_tracker.ui.screens.main.CustomTask
+import com.example.omega_tracker.ui.screens.main.NetworkChangeReceiver
+import com.example.omega_tracker.ui.screens.main.ReceiverCallBack
 import com.example.omega_tracker.utils.FormatTime
 import com.mikhaellopez.circularprogressbar.CircularProgressBar
 import retrofit2.Retrofit
@@ -52,7 +52,7 @@ import kotlin.time.Duration
 
 class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskView,
     DatePickerDialog.OnDateSetListener,
-    TimePickerDialog.OnTimeSetListener {
+    TimePickerDialog.OnTimeSetListener, ReceiverCallBack {
 
     companion object {
         fun createPendingIntent(context: Context, id: String): PendingIntent {
@@ -66,7 +66,7 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
         }
     }
 
-    lateinit var binding: ActivityStartTaskBinding
+    private lateinit var binding: ActivityStartTaskBinding
 
     @Inject
     lateinit var retrofit: Retrofit
@@ -80,13 +80,12 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
     }
 
     private lateinit var popupMenu: PopupMenu
-
     private lateinit var infoTask: Task
     private lateinit var dialog: Dialog
-    private var nameProjects: MutableList<String> = mutableListOf("Личные задачи")
-
     private lateinit var connection: ServiceConnection
+    private lateinit var dialogLoading: Dialog
 
+    private var nameProjects: MutableList<String> = mutableListOf("Личные задачи")
     private var format = FormatTime
     private var idTask: String = ""
     private var checkPause: Boolean = false
@@ -115,6 +114,9 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
         }
         setContentView(binding.root)
 
+
+
+        dialogLoading = Dialog(this)
         val startButton = binding.buttonStartButton
         val completeButton = binding.buttonComplete
         val buttonBack = binding.buttonBack
@@ -145,18 +147,12 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
         }
 
         completeButton.setOnClickListener {
-            if (stateTask.isNullOrEmpty()) {
-                showToast(
-                    Constants.TOAST_TYPE_ERROR, R.string.impossible_completed_task_no_internet
-                )
-            } else {
-                val intent =
-                    Intent(getIntentForeground()).putExtra("ID", infoTask.id).setAction(PAUSE)
-                startForegroundService(intent)
+            val intent =
+                Intent(getIntentForeground()).putExtra("ID", infoTask.id).setAction(PAUSE)
+            startForegroundService(intent)
 
-                presenter.updateStatus(infoTask.id, TaskStatus.Pause)
-                onComplete(timeFromLaunch, stateTask!!)
-            }
+            presenter.updateStatus(infoTask.id, TaskStatus.Pause)
+            onComplete(timeFromLaunch, stateTask!!)
         }
 
         buttonContinue.setOnClickListener {
@@ -210,6 +206,19 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
                 showToast(TOAST_TYPE_WARNING, R.string.stop_the_task)
             }
         }
+
+        networkChangeReceiver = NetworkChangeReceiver(this)
+    }
+
+    lateinit var networkChangeReceiver: NetworkChangeReceiver
+
+
+    override fun resendingTask(result: Boolean) {
+        if (result) {
+            log("resendingTask from StartTask $result")
+        } else {
+            log("resendingTask from StartTask $result")
+        }
     }
 
     override fun onStart() {
@@ -218,6 +227,19 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
         Intent(this, ForegroundService::class.java).also {
             bindService(it, connection, BIND_AUTO_CREATE)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        registerReceiver(
+            networkChangeReceiver,
+            IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+        )
+    }
+
+    override fun onPause() {
+        super.onPause()
+        unregisterReceiver(networkChangeReceiver)
     }
 
     override fun setTask(taskInfo: Task) {
@@ -265,7 +287,7 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
         taskName.setText(infoTask.summary)
         taskDescription.setText(infoTask.description)
         taskDeadLine.text = convertLocalDateToString(infoTask.onset)
-        term.setText(convertDuration(infoTask.evaluate))
+        term.setText(convertDurationToString(infoTask.evaluate))
 
         val arrayAdapter = ArrayAdapter(this, R.layout.spinner_row, R.id.text_row, nameProjects)
         projects.adapter = arrayAdapter
@@ -401,7 +423,7 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
         } else getString(R.string.no_date_specified)
     }
 
-    private fun convertDuration(term: Duration): String {
+    private fun convertDurationToString(term: Duration): String {
         return term.toString().replace("d", "д").replace("h", "ч").replace("m", "м")
     }
 
@@ -454,7 +476,6 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
             binding.buttonSettings.visibility = View.GONE
         }
     }
-
 
 
     override fun showLayoutStartButton() {
@@ -706,7 +727,7 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
                 }
             }
 
-            presenter.updateTimeCustomTask(result,infoTask)
+            presenter.updateTimeCustomTask(result, infoTask)
             presenter.removeTaskLaunchTime(result.idTask!!)
             binding.layoutOnlyStartButton.visibility = View.VISIBLE
             binding.layoutStartAndCompleteButton.visibility = View.GONE

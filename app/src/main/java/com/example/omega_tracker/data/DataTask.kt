@@ -62,5 +62,5 @@ data class AppDataTask(
 }
 
 enum class TaskStatus {
-    Open, Run, Pause
+    Open, Run, Pause, Pending
 }

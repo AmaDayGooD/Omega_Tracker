@@ -8,7 +8,6 @@ import com.example.omega_tracker.entity.Statistics
 import com.example.omega_tracker.entity.Task
 import retrofit2.Retrofit
 import java.time.LocalDateTime
-import java.time.OffsetTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -33,6 +32,18 @@ class GetDataFromBd @Inject constructor(
         return convertingOneItemFromNameEntity(dataBaseTasks.getTasksById(id))
     }
 
+    suspend fun insertPendingTask(pendingTaskData: PendingTaskData) {
+        dataBaseTasks.insertPendingTask(pendingTaskData)
+    }
+
+    suspend fun getPendingTask(): List<PendingTaskData> {
+        return dataBaseTasks.getPendingTask()
+    }
+
+    suspend fun deletePendingTask(idTask: String) {
+        dataBaseTasks.deletePendingTask(idTask)
+    }
+
     suspend fun updateTaskStatus(newStatus: TaskStatus, idTask: String) {
         dataBaseTasks.updateTaskStatus(newStatus.toString(), idTask)
     }
@@ -45,16 +56,32 @@ class GetDataFromBd @Inject constructor(
         return dataBaseTasks.getAllNameProjects()
     }
 
-    suspend fun insertCompletedTask(statisticsData: StatisticsData){
+    suspend fun insertCompletedTask(statisticsData: StatisticsData) {
         dataBaseTasks.insertCompletedTask(statisticsData)
     }
 
-    suspend fun getStatisticsToDay(toDayStart:LocalDateTime,toMorrowStart:LocalDateTime):List<Statistics>{
-        return convertingStatisticsDataToStatistics(dataBaseTasks.getStatisticsToDay(toDayStart.toString(),toMorrowStart.toString()))
+    suspend fun getStatisticsToDay(
+        toDayStart: LocalDateTime,
+        toMorrowStart: LocalDateTime
+    ): List<Statistics> {
+        return convertingStatisticsDataToStatistics(
+            dataBaseTasks.getStatisticsToDay(
+                toDayStart.toString(),
+                toMorrowStart.toString()
+            )
+        )
     }
 
-    suspend fun getStatisticsToWeek(toDayStartWeek:LocalDateTime,toDayEndWeek:LocalDateTime):List<Statistics>{
-        return convertingStatisticsDataToStatistics(dataBaseTasks.getStatisticsToWeek(toDayStartWeek.toString(),toDayEndWeek.toString()))
+    suspend fun getStatisticsToWeek(
+        toDayStartWeek: LocalDateTime,
+        toDayEndWeek: LocalDateTime
+    ): List<Statistics> {
+        return convertingStatisticsDataToStatistics(
+            dataBaseTasks.getStatisticsToWeek(
+                toDayStartWeek.toString(),
+                toDayEndWeek.toString()
+            )
+        )
     }
 
     suspend fun updateTimeCustomTask(timeSpent: String, idTask: String) {
@@ -86,7 +113,11 @@ class GetDataFromBd @Inject constructor(
             description = result.description,
             currentState = result.currentState,
             estimate = result.estimate.toDouble().seconds,
-            startDate = LocalDateTime.ofEpochSecond(result.startDate.toLong(), 0, ZoneOffset.UTC),
+            startDate = LocalDateTime.ofEpochSecond(
+                result.startDate.toLong(),
+                0,
+                ZoneOffset.UTC
+            ),
             timeSpent = result.timeSpent.toDouble().seconds,
             timeLeft = result.timeLeft.toDouble().seconds,
             taskStatus = result.taskStatus,
@@ -127,7 +158,7 @@ class GetDataFromBd @Inject constructor(
         }
     }
 
-    private fun convertingStatisticsDataToStatistics(statisticsData:List<StatisticsData>):MutableList<Statistics>{
+    private fun convertingStatisticsDataToStatistics(statisticsData: List<StatisticsData>): MutableList<Statistics> {
         val statistics = mutableListOf<Statistics>()
         statisticsData.forEach {
             statistics.add(
