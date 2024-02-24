@@ -7,7 +7,7 @@
     <string name="start_count">Запустить таймер</string>
     <string name="pause">Пауза</string>
     <string name="complete">Завершить</string>
-    <string name="exit">Выйти</string>
+    <string name="exit_from_profile">Выйти из профиля</string>
     <string name="settings">Настройки</string>
     <string name="successfully">Успешно</string>
     <string name="time_over">Просрочено на\n%s</string>
@@ -87,7 +87,7 @@
     <string name="change_task">Изменить задачу</string>
     <string name="remove_task">Удалить задачу</string>
     <string name="are_you_sure_delete_task">Вы уверены, что хотите удалить задачу?</string>
-    <string name="are_you_sure_to_log_out_of_your_profile">Вы уверены, что хотите выйти из вашего профиля?</string>
+    <string name="are_you_sure_to_log_out_of_your_profile">Вы уверены, что хотите выйти из вашего профиля?\n(все кастомные задачи удалятся)</string>
     <string name="сonfirmation">Подтверждение</string>
     <string name="yes">Да</string>
     <string name="no">Нет</string>
@@ -105,4 +105,5 @@
     <string name="youtrack">YouTrack</string>
     <string name="drums">Барабаны</string>
     <string name="pending_task_sent">Ожидающее задачи отправлены</string>
+    <string name="run_until">Выполнить до</string>
 </resources>

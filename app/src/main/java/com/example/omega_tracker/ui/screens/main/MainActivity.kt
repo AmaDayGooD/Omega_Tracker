@@ -1,6 +1,5 @@
 package com.example.omega_tracker.ui.screens.main
 
-import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.Dialog
 import android.app.TimePickerDialog
@@ -8,7 +7,6 @@ import android.content.*
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.icu.text.DateFormatSymbols
-import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
@@ -18,8 +16,11 @@ import android.view.View
 import android.view.Window
 import android.widget.*
 import android.widget.RelativeLayout.LayoutParams
-import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.work.Constraints
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkManager
 import com.bumptech.glide.Glide
 import com.example.omega_tracker.Constants
 import com.example.omega_tracker.R
@@ -30,8 +31,8 @@ import com.example.omega_tracker.entity.Task
 import com.example.omega_tracker.service.ForegroundService
 import com.example.omega_tracker.ui.base_class.BaseActivity
 import com.example.omega_tracker.ui.screens.profile.ProfileActivity.Companion.createIntentProfile
-import com.example.omega_tracker.ui.screens.authorization.AuthorizationActivity
 import com.example.omega_tracker.ui.screens.main.modelrecycleview.*
+import com.example.omega_tracker.ui.screens.main.work_manager.WorkerResendingPendingTasks
 import com.example.omega_tracker.ui.screens.statistics.StatisticsActivity.Companion.createIntentStatisticsActivity
 import com.github.twocoffeesoneteam.glidetovectoryou.GlideToVectorYou
 import com.github.twocoffeesoneteam.glidetovectoryou.GlideToVectorYouListener
@@ -45,8 +46,8 @@ import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 
 class MainActivity : BaseActivity(R.layout.activity_main), MainView,
-    DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener, OnItemClickListener,
-    ReceiverCallBack {
+    DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener, OnItemClickListener
+{
 
     var t = 0
 
@@ -83,7 +84,6 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
     private lateinit var nameProjects: MutableList<String>
 
     private lateinit var connection: ServiceConnection
-    private lateinit var networkChangeReceiver: NetworkChangeReceiver
     private var currentStateList = true
     private var onFirst = true
 
@@ -102,9 +102,8 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
         binding.recycleView.layoutManager = LinearLayoutManager(this)
         binding.recycleView.adapter = adapter
 
-        binding.buttonSettings.setOnClickListener {
-            val popupMenu = PopupMenu(this, it)
-            openPopupMenu(popupMenu)
+        binding.buttonProfile.setOnClickListener {
+            startActivity(createIntentProfile(this))
         }
         // Добавить кастомную задачу
         binding.buttonAddCustomTasks.setOnClickListener {
@@ -114,15 +113,17 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
         binding.buttonStatistics.setOnClickListener {
             startActivity(createIntentStatisticsActivity(this))
         }
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
 
-        networkChangeReceiver = NetworkChangeReceiver(this)
-    }
+        val oneTimeWorker =
+            OneTimeWorkRequest.Builder(WorkerResendingPendingTasks::class.java)
+                .setConstraints(constraints)
+                .build()
 
+        WorkManager.getInstance(applicationContext).enqueue(oneTimeWorker)
 
-    override fun resendingTask(result: Boolean) {
-        if (result) {
-            presenter.resendPendingTask()
-        }
     }
 
     override fun onStart() {
@@ -135,16 +136,11 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
 
     override fun onPause() {
         super.onPause()
-        unregisterReceiver(networkChangeReceiver)
     }
 
 
     override fun onResume() {
         super.onResume()
-        registerReceiver(
-            networkChangeReceiver,
-            IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
-        )
         presenter.updateListTask(currentStateList)
         presenter.getNotRunningTask()
     }
@@ -217,7 +213,7 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
                             .show()
                     }
                 }).load(uri, binding.imageProfile)
-        ).into(binding.imageProfile)
+        ).centerCrop().into(binding.imageProfile)
     }
 
     override fun getGlideToVector(): GlideToVectorYou {
@@ -249,30 +245,6 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
         dialogLoading.window?.setLayout(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
         dialogLoading.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialogLoading.show()
-    }
-
-    // Перейти на активити авторизации
-    override fun gotoAuth() {
-        startActivity(AuthorizationActivity.createIntent(this))
-    }
-
-    // Открыть меню
-    private fun openPopupMenu(popupMenu: PopupMenu) {
-        popupMenu.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.settings -> {
-                    startActivity(createIntentProfile(this))
-                    true
-                }
-                R.id.exitUser -> {
-                    showAlertDialog()
-                    true
-                }
-                else -> false
-            }
-        }
-        popupMenu.inflate(R.menu.menu_main)
-        popupMenu.show()
     }
 
     private fun showCreateCustomTaskDialog() {
@@ -398,8 +370,8 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
             ).show()
         }
 
-        val yesButton = dialog.findViewById<CardView>(R.id.button_ok)
-        val noButton = dialog.findViewById<CardView>(R.id.button_cancel)
+        val yesButton = dialog.findViewById<Button>(R.id.button_ok)
+        val noButton = dialog.findViewById<Button>(R.id.button_cancel)
 
         yesButton.setOnClickListener {
             if (inputType) {
@@ -484,28 +456,6 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
     private fun generateRandomId(length: Int): String {
         val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
         return charPool.shuffled().take(length).toSet().joinToString("")
-    }
-
-    private fun showAlertDialog() {
-        val builder = AlertDialog.Builder(this)
-
-        builder.setTitle(getString(R.string.сonfirmation))
-        builder.setMessage(getString(R.string.are_you_sure_to_log_out_of_your_profile))
-
-        builder.setPositiveButton(getString(R.string.yes)) { dialogInterface: DialogInterface, i: Int ->
-
-            presenter.deleteToken()
-            presenter.clearDataBase()
-            gotoAuth()
-            dialogInterface.dismiss()
-        }
-
-        builder.setNegativeButton(getString(R.string.no)) { dialogInterface: DialogInterface, i: Int ->
-            dialogInterface.dismiss()
-        }
-
-        val alertDialog: AlertDialog = builder.create()
-        alertDialog.show()
     }
 
     override fun onDateSet(view: DatePicker?, year: Int, monthOfYear: Int, dayOfMonth: Int) {

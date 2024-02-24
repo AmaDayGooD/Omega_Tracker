@@ -60,7 +60,7 @@ class MainPresenter(
 
     // Восстановление запущенных задач
     // после выгрузки приложения из памяти
-    fun getTaskForRestore() {
+    private fun getTaskForRestore() {
         launch {
             loadCurrentDataTask(adapter)
 
@@ -115,12 +115,6 @@ class MainPresenter(
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
-        }
-    }
-
-    fun resendPendingTask() {
-        launch {
-            appRepository.resendPendingTask(token)
         }
     }
 
@@ -255,21 +249,6 @@ class MainPresenter(
         launch {
             appRepository.createCustomTask(customTask)
         }
-    }
-
-    fun deleteToken() {
-        settings.deleteString()
-        deleteProfile()
-    }
-
-    fun clearDataBase() {
-        launch {
-            appRepository.clearDataBase()
-        }
-    }
-
-    private fun deleteProfile() {
-        settings.deleteProfile()
     }
 
     fun getInputTypeTime(): Boolean {

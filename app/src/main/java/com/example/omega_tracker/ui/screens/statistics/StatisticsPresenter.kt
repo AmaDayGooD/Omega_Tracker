@@ -10,7 +10,9 @@ import com.example.omega_tracker.ui.base_class.BasePresenter
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import java.time.DayOfWeek
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 import java.util.*
@@ -30,6 +32,7 @@ class StatisticsPresenter(private val settings: Settings) : BasePresenter<Statis
         OmegaTrackerApp.appComponent!!.inject(this)
         appRepository = AppRepository(coroutineContext, retrofit, dataBaseTasks)
         launch {
+            viewState.addDayInListShowDays(LocalDateTime.now())
             showStatistics(getCurrentDisplay())
         }
     }
@@ -46,17 +49,26 @@ class StatisticsPresenter(private val settings: Settings) : BasePresenter<Statis
         if (currentDisplay) {
             getStatisticsToWeek()
         } else {
-            getStatisticsForDay()
+            getStatisticsToDay()
         }
     }
 
-    private fun getStatisticsForDay() {
+    fun getStatisticsToDay(toDay: LocalDateTime = LocalDateTime.now()) {
         launch {
-            val result = appRepository.getStatisticsToDay()
-            log("result ${calculateHourlyStatistics(result)}")
+            val result = appRepository.getStatisticsToDay(toDay)
             getSumSpentTime(result)
-            viewState.setNumberOfCompletedTasks(result.size)
-            viewState.setCurrentStatistics(calculateHourlyStatistics(result))
+            if (toDay.toLocalDate() == LocalDate.now()) {
+                viewState.setNumberOfCompletedTasks(result.size)
+                viewState.setCurrentStatistics(calculateHourlyStatistics(result))
+            } else {
+                when {
+                    toDay > LocalDateTime.now() ->
+                        viewState.addNextDay(calculateHourlyStatistics(result))
+
+                    toDay < LocalDateTime.now() ->
+                        viewState.addPreviewDay(calculateHourlyStatistics(result))
+                }
+            }
         }
     }
 
@@ -76,7 +88,7 @@ class StatisticsPresenter(private val settings: Settings) : BasePresenter<Statis
         val endOfWeek =
             today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY)).withHour(23).withMinute(59)
                 .withSecond(0).withNano(0)
-        log("startOfWeek $startOfWeek || endOfWeek $endOfWeek")
+
         launch {
             val result = appRepository.getStatisticsToWeek(startOfWeek, endOfWeek)
             getSumSpentTime(result)
@@ -100,6 +112,7 @@ class StatisticsPresenter(private val settings: Settings) : BasePresenter<Statis
             val hourKey = String.format("%02d:00", hour)
             hourlyStatistics.putIfAbsent(hourKey, 0f)
         }
+        log("hourlyStatistics $hourlyStatistics")
         return hourlyStatistics.toSortedMap(compareBy { it })
     }
 

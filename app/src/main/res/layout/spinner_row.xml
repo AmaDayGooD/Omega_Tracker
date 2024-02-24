@@ -8,7 +8,7 @@
         android:id="@+id/text_row"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/light_Purple"
+        android:background="@color/semitransparent_Purple"
         android:fontFamily="@font/rubik_medium"
         android:padding="10dp"
         android:textColor="@color/real_white"

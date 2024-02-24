@@ -52,6 +52,9 @@ class LineChartView(context: Context, attrs: AttributeSet) : View(context, attrs
      */
 
     private var thicknessLine = 10f
+    private var listGradientColor = intArrayOf(
+        context.getColor(R.color.main_strong), context.getColor(R.color.white)
+    )
 
     fun setThicknessLine(thickness: Float) {
         if (thickness in 5f..15f) {
@@ -59,6 +62,24 @@ class LineChartView(context: Context, attrs: AttributeSet) : View(context, attrs
         }
     }
 
+    /**
+     * Настройка градиентного цвета линии графика
+     *
+     * параметря для двухцветного градиента
+     * @param firstColor    первый цвет
+     * @param twoColor      второй цвет
+     */
+    fun setGradientColorLine(firstColor: Int, twoColor: Int) {
+        listGradientColor = intArrayOf(firstColor, twoColor)
+    }
+
+    /**
+     * параметр для одноцветного линейного графика
+     * @param singleColor цвет графика
+     */
+    fun setSingleColorLine(singleColor: Int) {
+        listGradientColor = intArrayOf(singleColor, singleColor)
+    }
 
     private var mDataX = emptyList<String>() // Массив времени событий
     private var mDataY = emptyList<Float>() // Массив времени, потраченного на события (в минутах)
@@ -73,8 +94,9 @@ class LineChartView(context: Context, attrs: AttributeSet) : View(context, attrs
     // Paint для рисования графика
     private val paint = Paint().apply {
         style = Paint.Style.STROKE
-        strokeWidth = 5f
+        strokeWidth = 15f
         isAntiAlias = true
+        color = context.getColor(R.color.black)
     }
 
     // Paint's для рисования текста
@@ -125,7 +147,7 @@ class LineChartView(context: Context, attrs: AttributeSet) : View(context, attrs
     private val margin = 20f
 
     // Установка данных для графика
-    private var horizontalOffset = 0f
+    private var horizontalOffset = 1f
 
     fun setListener(listener: ListenerMyProductivity) {
         listenerMyProductivity = listener
@@ -139,20 +161,29 @@ class LineChartView(context: Context, attrs: AttributeSet) : View(context, attrs
 
     private fun resetSettingsToDefault() {
         //Сброс смещения в начальное положение
-        horizontalOffset = 0f
         // сброс координат точек
         listCoordinates.clear()
-
         stepY = if (typeView) 60f else 30f
         maxWidthText = getMaxWidth()
         xStep = maxWidthText
-        maxOffset = ((xStep * (mDataX.size)) - (width)) + MULTIPLIER_LAST_POINT * xStep
-        log("maxOffset $maxOffset")
+        maxOffset = ((xStep * (mDataX.size)) - (width)) + (MULTIPLIER_LAST_POINT * xStep)
+    }
+
+    private fun resetHorizontalOffset() {
+        horizontalOffset = 1f
     }
 
     fun setData(dataX: List<String>, dataY: List<Float>, displayType: Boolean) {
-        // Тип тип показа деньили неделя
+        // Тип показа деньили неделя
         typeView = displayType
+        mDataX = dataX
+        mDataY = dataY
+        resetHorizontalOffset()
+        resetSettingsToDefault()
+        invalidate()
+    }
+
+    fun addNewData(dataX: List<String>, dataY: List<Float>) {
         mDataX = dataX
         mDataY = dataY
         resetSettingsToDefault()
@@ -237,6 +268,7 @@ class LineChartView(context: Context, attrs: AttributeSet) : View(context, attrs
         mDataX.forEach { text ->
             listWidth.add(paintTextXCoordinates.measureText(text))
         }
+
         return if (typeView) {
             listWidth.max() * MULTIPLIER_WEEK
         } else {
@@ -267,28 +299,32 @@ class LineChartView(context: Context, attrs: AttributeSet) : View(context, attrs
 
     // Отрисовка меток по оси X
     private fun drawXAxisLabels(canvas: Canvas) {
+        var xCoord = 0f
         for (i in mDataX.indices) {
-            val xCoord =
-                (LABEL_MARGIN + i * xStep - horizontalOffset) //5f для сопоставления точки на графике и подписи
+            xCoord =
+                (LABEL_MARGIN + i * xStep - horizontalOffset)
             val label = mDataX[i]
             // Рисование текста на холсте
             canvas.drawText(label, xCoord + 70f, height.toFloat() - 50, paintTextXCoordinates)
-        }
 
+            // Границы дней
+            if (i > 0 && i % 10 == 0) {
+                canvas.drawLine(xCoord, 0f, xCoord, height.toFloat(), paint)
+            }
+        }
     }
 
     private fun drawGraph(canvas: Canvas) {
         // Отрисовка графика
+        // ПЕРЕДЕЛАТЬ!!  Метки для оси Y должны быть адаптивными
         val intervalHeight = (height.toFloat() - 100) / ((mDataY.maxOrNull() ?: 0f) / stepY + 2)
-        val colors = intArrayOf(
-            context.getColor(R.color.main_strong), resources.getColor(R.color.white)
-        )
+
         val shader = LinearGradient(
             LABEL_MARGIN,
             height.toFloat() - 100f,
             width.toFloat() + 550f,
             height.toFloat(),
-            colors,
+            listGradientColor,
             null,
             Shader.TileMode.CLAMP
         )
@@ -301,17 +337,19 @@ class LineChartView(context: Context, attrs: AttributeSet) : View(context, attrs
             val xCoordinates = (LABEL_MARGIN + 70f + (i * xStep) - horizontalOffset)
             val yCoordinates =
                 height.toFloat() - bottomMarginGraphic - mDataY[i] * intervalHeight / stepY
-            listCoordinates.add(Pair(xCoordinates - horizontalOffset, yCoordinates))
+
+            listCoordinates.add(Pair(LABEL_MARGIN + 70f + (i * xStep), yCoordinates))
             if (listCoordinates.size > mDataX.size) {
                 val subList = listCoordinates.subList(mDataX.size, listCoordinates.size)
                 subList.clear()
             }
+
             if (i == 0) {
                 path.moveTo(xCoordinates, yCoordinates)
             } else {
-                val prevX = LABEL_MARGIN + 70f + ((i-1) * xStep) - horizontalOffset
+                val prevX = LABEL_MARGIN + 70f + ((i - 1) * xStep) - horizontalOffset
                 val prevY =
-                    height.toFloat() - bottomMarginGraphic - mDataY[i-1] * intervalHeight / stepY
+                    height.toFloat() - bottomMarginGraphic - mDataY[i - 1] * intervalHeight / stepY
                 val cx = (prevX + xCoordinates) / 2
                 path.cubicTo(cx, prevY, cx, yCoordinates, xCoordinates, yCoordinates)
             }
@@ -338,8 +376,11 @@ class LineChartView(context: Context, attrs: AttributeSet) : View(context, attrs
             }
             MotionEvent.ACTION_MOVE -> {
                 val offset = event.x - previousX
-                setHorizontalScroll(horizontalOffset - offset / 20)
+                setHorizontalScroll(horizontalOffset - (offset / 60))
                 onPress = offset < 1f
+
+                addNewDay(offset)
+                getCurrentShowDay()
                 return true
             }
             MotionEvent.ACTION_UP -> {
@@ -356,6 +397,27 @@ class LineChartView(context: Context, attrs: AttributeSet) : View(context, attrs
             }
         }
         return super.onTouchEvent(event)
+    }
+
+    private fun addNewDay(offset: Float) {
+        if (!typeView) {
+            if (horizontalOffset == 0f && offset > width / 1.5) {
+                listenerMyProductivity!!.addPreviewDayOnGraphic()
+                val countStep = mDataX.size / 10
+                val step = maxOffset / countStep
+                horizontalOffset = step
+            } else if (horizontalOffset == maxOffset && offset < -(width / 1.5)) {
+                listenerMyProductivity!!.addNextDayOnGraphic()
+            }
+        }
+    }
+
+    private fun getCurrentShowDay() {
+        val step = xStep * 10
+        val mediumWidth = (width / 2) + (LABEL_MARGIN / 2)
+        val currentCenterGraphic = mediumWidth + horizontalOffset
+        val indexCurrentDay = (currentCenterGraphic / step).toInt()
+        listenerMyProductivity!!.setCurrentDay(indexCurrentDay)
     }
 
     private fun log(text: String) {

@@ -37,13 +37,8 @@ interface MainView : BaseView {
     fun getAllNameProjects(allNameProjects: List<String>?)
 
     @MoxyViewCommand(StrategyType.ADD_TO_END)
-    fun gotoAuth()
-
-    @MoxyViewCommand(StrategyType.ADD_TO_END)
     fun removeLoadBar()
 
     @MoxyViewCommand(StrategyType.ADD_TO_END)
     fun restoreLoadBar()
-
-
 }

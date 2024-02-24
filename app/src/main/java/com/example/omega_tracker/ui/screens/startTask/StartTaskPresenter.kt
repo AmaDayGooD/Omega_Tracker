@@ -50,6 +50,7 @@ class StartTaskPresenter(
                 viewState.setVisibleButtonSettings(task.taskType)
                 viewState.setTask(task)
             }
+            //appRepository.getStateBundle(token)
         }
     }
 

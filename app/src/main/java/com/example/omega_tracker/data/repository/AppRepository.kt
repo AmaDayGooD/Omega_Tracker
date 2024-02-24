@@ -21,7 +21,7 @@ import kotlin.coroutines.CoroutineContext
 
 class AppRepository @Inject constructor(
     override val coroutineContext: CoroutineContext,
-    retrofit: Retrofit,
+    private val retrofit: Retrofit,
     private val dataBaseTasks: TasksDao
 
 ) : CoroutineScope {
@@ -74,15 +74,6 @@ class AppRepository @Inject constructor(
         getDataFromBd.insertPendingTask(pendingTask)
     }
 
-    suspend fun resendPendingTask(token: String) {
-        val listPendingTasks = getDataFromBd.getPendingTask()
-        listPendingTasks.forEach {
-            val convertingPendingTask = convertPendingDataToTimeTrackBody(it)
-            postTimeSpent(it.idTask, token, convertingPendingTask)
-            updateTaskStatus(it.idTask, TaskStatus.Open)
-            getDataFromBd.deletePendingTask(it.idTask)
-        }
-    }
 
     suspend fun getStateBundle(token: String): List<StateBundleElement>? {
         return getDataFromApi.getStateBundle(token)
@@ -120,10 +111,9 @@ class AppRepository @Inject constructor(
         dataBaseTasks.updateTimeLaunch(timeNow.toString(), idTask)
     }
 
-    suspend fun getStatisticsToDay(): List<Statistics> {
-        val toDayStart = LocalDateTime.now().with(LocalTime.MIN)
-        val toMorrowStart = toDayStart.plusDays(1)
-        return getDataFromBd.getStatisticsToDay(toDayStart, toMorrowStart)
+    suspend fun getStatisticsToDay(toDay:LocalDateTime): List<Statistics> {
+        val toMorrowStart = toDay.plusDays(1).toLocalDate()
+        return getDataFromBd.getStatisticsToDay(toDay.toLocalDate(), toMorrowStart)
     }
 
     suspend fun getStatisticsToWeek(

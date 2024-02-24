@@ -13,7 +13,6 @@
         android:layout_height="match_parent"
         android:background="@color/translucent"
         android:clickable="false"
-        android:elevation="20dp"
         android:gravity="center"
         android:orientation="vertical"
         android:visibility="gone">
@@ -52,11 +51,12 @@
                 android:textSize="24sp" />
 
             <androidx.cardview.widget.CardView
-                android:id="@+id/testImg"
+                android:id="@+id/button_profile"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
+                android:layout_marginHorizontal="5dp"
                 app:cardBackgroundColor="@color/real_white"
-                app:cardCornerRadius="10dp"
+                app:cardCornerRadius="25dp"
                 app:cardElevation="0dp">
 
                 <ImageView
@@ -65,25 +65,6 @@
                     android:layout_height="match_parent"
                     android:src="@drawable/ic_omegatracker" />
 
-            </androidx.cardview.widget.CardView>
-
-            <androidx.cardview.widget.CardView
-                android:id="@+id/button_settings"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginHorizontal="10dp"
-                android:background="@color/real_white"
-                android:backgroundTint="@color/real_white"
-                app:cardCornerRadius="10dp"
-                app:cardElevation="0dp"
-                app:strokeColor="@color/black"
-                app:strokeWidth="2dp">
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:padding="22dp"
-                    android:src="@drawable/ic_more" />
             </androidx.cardview.widget.CardView>
 
 

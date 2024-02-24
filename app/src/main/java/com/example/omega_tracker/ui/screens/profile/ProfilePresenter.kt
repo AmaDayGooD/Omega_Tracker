@@ -8,6 +8,7 @@ import com.example.omega_tracker.data.local_data.TasksDao
 import com.example.omega_tracker.data.repository.AppRepository
 import com.example.omega_tracker.ui.base_class.BasePresenter
 import com.example.omega_tracker.utils.FormatTime
+import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import javax.inject.Inject
 
@@ -37,11 +38,26 @@ class ProfilePresenter(private val settings: Settings) :
         viewState.setProfile(profile)
     }
 
-    fun changeTypeEnterTime(value:Boolean){
+    fun changeTypeEnterTime(value: Boolean) {
         settings.changeTypeEnterTime(value)
     }
 
-    fun getTypeEnterTime():Boolean{
+    fun getTypeEnterTime(): Boolean {
         return settings.getTypeEnterTime()
+    }
+
+    fun deleteToken() {
+        settings.deleteString()
+        deleteProfile()
+    }
+
+    fun clearDataBase() {
+        launch {
+            appRepository.clearDataBase()
+        }
+    }
+
+    private fun deleteProfile() {
+        settings.deleteProfile()
     }
 }

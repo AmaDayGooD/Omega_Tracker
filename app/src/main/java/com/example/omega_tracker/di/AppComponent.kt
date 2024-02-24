@@ -5,6 +5,7 @@ import com.example.omega_tracker.data.repository.AppRepository
 import com.example.omega_tracker.ui.screens.profile.ProfilePresenter
 import com.example.omega_tracker.ui.screens.authorization.AuthorizationPresenter
 import com.example.omega_tracker.ui.screens.main.MainPresenter
+import com.example.omega_tracker.ui.screens.main.work_manager.WorkerResendingPendingTasks
 import com.example.omega_tracker.ui.screens.splash.StartPresenter
 import com.example.omega_tracker.ui.screens.startTask.StartTaskPresenter
 import com.example.omega_tracker.ui.screens.statistics.StatisticsPresenter
@@ -21,6 +22,8 @@ interface AppComponent {
     fun inject(presenter: ProfilePresenter)
     fun inject(presenter: StatisticsPresenter)
     fun inject(appRepository: AppRepository)
+
+    fun inject(workerResendingPendingTasks: WorkerResendingPendingTasks)
 
 
     val data: TasksDao

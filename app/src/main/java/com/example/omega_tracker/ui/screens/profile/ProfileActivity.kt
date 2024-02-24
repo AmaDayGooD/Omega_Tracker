@@ -1,9 +1,12 @@
 package com.example.omega_tracker.ui.screens.profile
 
+import android.app.AlertDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.widget.Button
 import android.widget.RadioButton
 import android.widget.Toast
 import com.bumptech.glide.Glide
@@ -12,6 +15,7 @@ import com.example.omega_tracker.data.local_data.Settings
 import com.example.omega_tracker.databinding.ActivityProfileBinding
 import com.example.omega_tracker.entity.Profile
 import com.example.omega_tracker.ui.base_class.BaseActivity
+import com.example.omega_tracker.ui.screens.authorization.AuthorizationActivity
 import com.github.twocoffeesoneteam.glidetovectoryou.GlideToVectorYou
 import com.github.twocoffeesoneteam.glidetovectoryou.GlideToVectorYouListener
 
@@ -28,6 +32,7 @@ class ProfileActivity : BaseActivity(R.layout.activity_profile), ProfileView {
 
     lateinit var radioButtonDrums: RadioButton
     lateinit var radioButtonYouTrack: RadioButton
+    lateinit var buttonExit: Button
     override val presenter: ProfilePresenter by providePresenter {
         ProfilePresenter(Settings(this))
     }
@@ -43,6 +48,7 @@ class ProfileActivity : BaseActivity(R.layout.activity_profile), ProfileView {
 
         radioButtonDrums = binding.radiobuttonDrums
         radioButtonYouTrack = binding.radiobuttonYoutrack
+        buttonExit = binding.buttonExitFromProfile
         radioButtonDrums.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 presenter.changeTypeEnterTime(true)
@@ -58,6 +64,10 @@ class ProfileActivity : BaseActivity(R.layout.activity_profile), ProfileView {
                 log("YouTrack")
             }
         }
+        buttonExit.setOnClickListener{
+            showAlertDialog()
+        }
+
 
     }
 
@@ -92,5 +102,31 @@ class ProfileActivity : BaseActivity(R.layout.activity_profile), ProfileView {
     override fun setStateRadioButton(state: Boolean) {
         radioButtonDrums.isChecked = state
         radioButtonYouTrack.isChecked = !radioButtonDrums.isChecked
+    }
+
+    private fun showAlertDialog() {
+        val builder = AlertDialog.Builder(this)
+
+        builder.setTitle(getString(R.string.сonfirmation))
+        builder.setMessage(getString(R.string.are_you_sure_to_log_out_of_your_profile))
+
+        builder.setPositiveButton(getString(R.string.yes)) { dialogInterface: DialogInterface, i: Int ->
+
+            presenter.deleteToken()
+            presenter.clearDataBase()
+            gotoAuth()
+            dialogInterface.dismiss()
+        }
+
+        builder.setNegativeButton(getString(R.string.no)) { dialogInterface: DialogInterface, i: Int ->
+            dialogInterface.dismiss()
+        }
+
+        val alertDialog: AlertDialog = builder.create()
+        alertDialog.show()
+    }
+
+    override fun gotoAuth() {
+        startActivity(AuthorizationActivity.createIntent(this))
     }
 }

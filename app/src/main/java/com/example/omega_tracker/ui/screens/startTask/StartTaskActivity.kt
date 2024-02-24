@@ -5,7 +5,6 @@ import android.app.*
 import android.content.*
 import android.graphics.Typeface
 import android.icu.text.DateFormatSymbols
-import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
@@ -18,6 +17,7 @@ import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.work.*
 import com.example.omega_tracker.Constants
 import com.example.omega_tracker.R
 import com.example.omega_tracker.data.TaskStatus
@@ -37,7 +37,6 @@ import com.example.omega_tracker.service.ForegroundService.Companion.stopTimerSe
 import com.example.omega_tracker.service.ServiceTask
 import com.example.omega_tracker.ui.base_class.BaseActivity
 import com.example.omega_tracker.ui.screens.main.CustomTask
-import com.example.omega_tracker.ui.screens.main.NetworkChangeReceiver
 import com.example.omega_tracker.ui.screens.main.ReceiverCallBack
 import com.example.omega_tracker.utils.FormatTime
 import com.mikhaellopez.circularprogressbar.CircularProgressBar
@@ -64,6 +63,7 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
         fun createIntentStartTask(context: Context, id: String): Intent {
             return Intent(context, StartTaskActivity::class.java).putExtra("id", id)
         }
+
     }
 
     private lateinit var binding: ActivityStartTaskBinding
@@ -114,8 +114,6 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
         }
         setContentView(binding.root)
 
-
-
         dialogLoading = Dialog(this)
         val startButton = binding.buttonStartButton
         val completeButton = binding.buttonComplete
@@ -123,6 +121,7 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
         val buttonPause = binding.buttonPause
         val buttonContinue = binding.buttonContinue
         val buttonMoreCustomTask = binding.buttonSettings
+
 
         presenter.getStateList()
         presenter.getAllNameProjects()
@@ -207,10 +206,7 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
             }
         }
 
-        networkChangeReceiver = NetworkChangeReceiver(this)
     }
-
-    lateinit var networkChangeReceiver: NetworkChangeReceiver
 
 
     override fun resendingTask(result: Boolean) {
@@ -231,15 +227,10 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
 
     override fun onResume() {
         super.onResume()
-        registerReceiver(
-            networkChangeReceiver,
-            IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
-        )
     }
 
     override fun onPause() {
         super.onPause()
-        unregisterReceiver(networkChangeReceiver)
     }
 
     override fun setTask(taskInfo: Task) {
@@ -276,8 +267,8 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
         val taskDeadLine = dialog.findViewById<TextView>(R.id.textview_change_date)
         val term = dialog.findViewById<EditText>(R.id.edittext_term_youtrack)
         var projectName: String = infoTask.nameProject
-        val cancelButton = dialog.findViewById<CardView>(R.id.button_cancel)
-        val updateButton = dialog.findViewById<CardView>(R.id.button_update)
+        val cancelButton = dialog.findViewById<Button>(R.id.button_cancel)
+        val updateButton = dialog.findViewById<Button>(R.id.button_update)
         val projects = dialog.findViewById<Spinner>(R.id.spinner_projects)
 
         var yearFromCalendar = infoTask.onset?.year ?: LocalDate.now().year
@@ -407,6 +398,7 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
             val intent = Intent(getIntentForeground()).putExtra("ID", infoTask.id).setAction(STOP)
             startService(intent)
             dialogInterface.dismiss()
+            finish()
         }
 
         builder.setNegativeButton(getString(R.string.no)) { dialogInterface: DialogInterface, i: Int ->
@@ -613,7 +605,7 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
             })
             if (result.day != 0 || result.hour != 0 || result.minute != 0) {
                 // отправка данных в YouTrack
-                presenter.postTimeSpent(result,infoTask)
+                presenter.postTimeSpent(result, infoTask)
                 presenter.postStateTask(result)
                 presenter.updateInfoTask()
                 presenter.updateStatus(infoTask.id, TaskStatus.Open)

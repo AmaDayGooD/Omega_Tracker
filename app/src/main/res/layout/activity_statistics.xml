@@ -178,10 +178,21 @@
                 app:thumbTextPadding="30dp"
                 app:track="@drawable/track" />
 
+            <TextView
+                android:id="@+id/textview_day_shown"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_gravity="center_horizontal"
+                android:lines="1"
+                android:textSize="20sp"
+                android:textColor="@color/gray"
+                android:textAlignment="center" />
+
             <com.example.omega_tracker.ui.screens.statistics.LineChartView
                 android:id="@+id/chartStatistics"
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
+                android:layout_height="match_parent"
                 android:layout_margin="20dp" />
 
         </LinearLayout>

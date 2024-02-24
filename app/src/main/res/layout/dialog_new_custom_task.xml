@@ -22,7 +22,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fontFamily="@font/rubik_medium"
-        android:text="Выполнить до"
+        android:text="@string/run_until"
         android:textColor="@color/only_white"
         android:textSize="16sp" />
 
@@ -49,8 +49,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:baselineAligned="false"
-        android:orientation="horizontal"
-        android:visibility="gone">
+        android:orientation="horizontal">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -64,7 +63,7 @@
                 android:layout_height="75dp"
                 android:layout_marginHorizontal="10dp"
                 android:layout_marginVertical="10dp"
-                android:background="@color/light_Purple"
+                android:background="@color/semi_transparent_black"
                 android:theme="@style/NumberPickerTheme" />
 
             <TextView
@@ -89,7 +88,7 @@
                 android:layout_height="75dp"
                 android:layout_marginHorizontal="10dp"
                 android:layout_marginVertical="10dp"
-                android:background="@color/light_Purple"
+                android:background="@color/semi_transparent_black"
                 android:theme="@style/NumberPickerTheme" />
 
             <TextView
@@ -114,7 +113,7 @@
                 android:layout_height="75dp"
                 android:layout_marginHorizontal="10dp"
                 android:layout_marginVertical="10dp"
-                android:background="@color/light_Purple"
+                android:background="@color/semi_transparent_black"
                 android:theme="@style/NumberPickerTheme" />
 
             <TextView
@@ -143,7 +142,8 @@
     <Spinner
         android:id="@+id/spinner_projects"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:background="@color/semi_transparent_black" />
 
     <TextView
         android:layout_width="match_parent"
@@ -190,50 +190,33 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="horizontal"
-        android:paddingTop="20dp"
-        android:weightSum="100">
+        android:paddingTop="10dp">
 
-        <androidx.cardview.widget.CardView
+        <Button
             android:id="@+id/button_cancel"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="10dp"
-            android:layout_weight="40"
+            android:backgroundTint="@color/semitransparent_Purple"
             android:elevation="0dp"
-            app:cardBackgroundColor="@color/light_Purple">
+            android:paddingHorizontal="20dp"
+            android:text="@string/cancel"
+            android:textColor="@color/only_white"
+            android:textSize="15sp" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginHorizontal="15dp"
-                android:layout_marginVertical="10dp"
-                android:fontFamily="@font/rubik_regular"
-                android:text="@string/cancel"
-                android:textColor="@color/only_white"
-                android:textSize="15sp" />
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
+        <Button
             android:id="@+id/button_ok"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="10dp"
-            android:layout_weight="40"
+            android:backgroundTint="@color/semitransparent_Purple"
             android:elevation="0dp"
-            app:cardBackgroundColor="@color/light_Purple">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginHorizontal="15dp"
-                android:layout_marginVertical="10dp"
-                android:fontFamily="@font/rubik_regular"
-                android:text="@string/create"
-                android:textColor="@color/only_white"
-                android:textSize="15sp" />
-        </androidx.cardview.widget.CardView>
+            android:paddingHorizontal="20dp"
+            android:text="@string/create"
+            android:textColor="@color/only_white"
+            android:textSize="15sp" />
 
     </LinearLayout>
 

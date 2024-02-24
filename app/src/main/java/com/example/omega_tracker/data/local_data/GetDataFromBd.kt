@@ -1,5 +1,6 @@
 package com.example.omega_tracker.data.local_data
 
+import android.util.Log
 import androidx.core.net.toUri
 import com.example.omega_tracker.data.AppDataTask
 import com.example.omega_tracker.data.DataStatistics
@@ -7,6 +8,7 @@ import com.example.omega_tracker.data.TaskStatus
 import com.example.omega_tracker.entity.Statistics
 import com.example.omega_tracker.entity.Task
 import retrofit2.Retrofit
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -61,8 +63,8 @@ class GetDataFromBd @Inject constructor(
     }
 
     suspend fun getStatisticsToDay(
-        toDayStart: LocalDateTime,
-        toMorrowStart: LocalDateTime
+        toDayStart: LocalDate,
+        toMorrowStart: LocalDate
     ): List<Statistics> {
         return convertingStatisticsDataToStatistics(
             dataBaseTasks.getStatisticsToDay(
