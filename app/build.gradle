@@ -86,12 +86,12 @@ dependencies {
     implementation 'javax.inject:javax.inject:1'
     ksp "com.google.dagger:dagger-compiler:2.48"
     //OmegaBase
-    //implementation 'com.github.Omega-R.OmegaBase:annotations:16c07b6196'
     implementation 'com.github.Omega-R.OmegaBase:core:16c07b6196'
     // custom Numberpicker
     implementation 'com.github.StephenVinouze:MaterialNumberPicker:1.1.0'
     // Custom chart
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 }
 
 kapt {

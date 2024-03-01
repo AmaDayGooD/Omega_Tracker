@@ -2,7 +2,7 @@ package com.example.omega_tracker.data.remote_data.dataclasses
 
 import com.squareup.moshi.Json
 
-data class UserBody(
+data class BodyUser(
     @Json(name = "name")
     val name: String,
     @Json(name = "avatarUrl")

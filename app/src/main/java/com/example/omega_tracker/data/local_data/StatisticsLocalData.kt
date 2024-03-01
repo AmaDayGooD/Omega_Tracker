@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "Statistics")
-data class StatisticsData(
+data class StatisticsLocalData(
     @PrimaryKey(autoGenerate = true)
     val id:Int? = null,
     val idTask:String,

@@ -56,13 +56,23 @@ class RunningTask(intent: Intent?) {
         pauseTimer = !pauseTimer
     }
 
+    fun pauseTimer() {
+        log("pauseTimer")
+        pauseTimer = true
+    }
+
+    fun continueTimer() {
+        log("continueTimer")
+        pauseTimer = false
+    }
+
 
     fun startTimer(): Flow<ServiceTask> = flow {
-        if(timeLaunch!=null){
-            val difference = Dura.between(timeLaunch,LocalDateTime.now()).seconds
+        if (timeLaunch != null) {
+            val difference = Dura.between(timeLaunch, LocalDateTime.now()).seconds
 
-            timeSpent+=difference.seconds
-            timeLeft-=difference.seconds
+            timeSpent += difference.seconds
+            timeLeft -= difference.seconds
             log("$difference || timeSpent $timeSpent || timeLeft $timeLeft")
         }
         var timeSpentUpdate = timeSpent
@@ -100,15 +110,17 @@ class RunningTask(intent: Intent?) {
             )
             delay(1.seconds)
         }
+        log("overTime $overTime")
         emit(
             ServiceTask(
-            id = id,
-            title = title,
-            timeLeft = timeLeftUpdate,
-            timeSpent = timeSpentUpdate,
-            timeFromLaunch = timeFromLaunch,
-            taskStatus = TaskStatus.Open
-        ))
+                id = id,
+                title = title,
+                timeLeft = timeLeftUpdate,
+                timeSpent = timeSpentUpdate,
+                timeFromLaunch = timeFromLaunch,
+                taskStatus = TaskStatus.Open
+            )
+        )
         overTime = true
     }
 

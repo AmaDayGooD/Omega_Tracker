@@ -8,8 +8,6 @@ import com.example.omega_tracker.data.repository.AppRepository
 import com.example.omega_tracker.data.local_data.TasksDao
 import com.example.omega_tracker.entity.Profile
 import com.example.omega_tracker.ui.base_class.BasePresenter
-import com.example.omega_tracker.utils.FormatTime
-import com.omega_r.base.mvp.presenters.OmegaPresenter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
@@ -27,11 +25,12 @@ class AuthorizationPresenter(private val settings: Settings) : BasePresenter<Aut
     lateinit var dataBaseTasks: TasksDao
 
     private val appRepository = AppRepository(Dispatchers.Main, retrofit, dataBaseTasks)
+
     private fun checkIsEmptyToken(token: String): Boolean {
         return token.isEmpty()
     }
 
-    fun auth(token: String) {
+    fun authorization(token: String) {
         if (checkIsEmptyToken(token)) {
             viewState.tokenIsEmpty()
         } else {
@@ -56,6 +55,10 @@ class AuthorizationPresenter(private val settings: Settings) : BasePresenter<Aut
         if (answer == null) {
             viewState.checkInternet(token)
         } else {
+            launch {
+                val stateTask =appRepository.getStateBundle(token)
+                appRepository.setStateTask(stateTask)
+            }
             settings.saveProfile(answer)
             receivedGoodAnswer(token)
         }

@@ -5,46 +5,55 @@ import androidx.room.*
 @Dao
 interface TasksDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertTask(entity: TaskData)
+    suspend fun insertTask(entity: TaskLocalData)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun setStateTask(stateTask: StateTaskLocalData)
+
+    @Query("SELECT * FROM StateTask")
+    suspend fun getStateBundle():List<StateTaskLocalData>
 
     @Query("UPDATE Tasks SET timeSpent= timeSpent+ :timeSpent, timeLeft = timeLeft- :timeSpent WHERE id_tasks = :idTask")
     suspend fun updateTimeCustomTask(timeSpent: String, idTask: String)
 
     @Update
-    suspend fun updateCustomTask(entity: TaskData)
+    suspend fun updateCustomTask(entity: TaskLocalData)
 
     @Query("SELECT * FROM Tasks WHERE taskStatus = 'Run' AND taskLaunchTime IS NOT NULL AND taskLaunchTime!='null'")
-    suspend fun getTaskForRestore(): MutableList<TaskData>
+    suspend fun getTaskForRestore(): MutableList<TaskLocalData>
 
     @Query("SELECT nameProject FROM Tasks Group by nameProject HAVING nameProject!='Личные задачи'")
     suspend fun getAllNameProjects(): List<String>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertCompletedTask(statisticsData: StatisticsData)
+    suspend fun insertCompletedTask(statisticsLocalData: StatisticsLocalData)
 
     @Query("SELECT * FROM Statistics WHERE dataCompleted BETWEEN :toDayStart AND :toMorrowStart")
-    suspend fun getStatisticsToDay(toDayStart: String, toMorrowStart: String): List<StatisticsData>
+    suspend fun getStatisticsToDay(
+        toDayStart: String,
+        toMorrowStart: String
+    ): List<StatisticsLocalData>
 
     @Query("SELECT * FROM Statistics WHERE dataCompleted BETWEEN :toDayStartWeek AND :toDayEndWeek")
     suspend fun getStatisticsToWeek(
         toDayStartWeek: String,
         toDayEndWeek: String
-    ): List<StatisticsData>
+    ): List<StatisticsLocalData>
 
     @Query("SELECT * FROM Tasks")
-    suspend fun getAllTasks(): MutableList<TaskData>
+    suspend fun getAllTasks(): MutableList<TaskLocalData>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertPendingTask(pendingTaskData: PendingTaskData)
+    suspend fun insertPendingTask(pendingTaskData: PendingTaskLocalData)
 
     @Query("SELECT * FROM Pending")
-    suspend fun getPendingTask(): MutableList<PendingTaskData>
+    suspend fun getPendingTask(): MutableList<PendingTaskLocalData>
 
     @Query("DELETE FROM Pending WHERE idTask=:idTask")
-    suspend fun deletePendingTask(idTask:String)
+    suspend fun deletePendingTask(idTask: String)
 
     @Query("SELECT * FROM Tasks WHERE id_tasks = :idTask")
-    suspend fun getTasksById(idTask: String): TaskData
+    suspend fun getTasksById(idTask: String): TaskLocalData
 
     @Query("UPDATE Tasks SET taskStatus= :newStatus WHERE id_tasks = :idTask")
     suspend fun updateTaskStatus(newStatus: String, idTask: String)
@@ -59,5 +68,12 @@ interface TasksDao {
     suspend fun removeTask(idTask: String)
 
     @Query("DELETE FROM Tasks")
-    suspend fun clearDataBase()
+    suspend fun deleteTableTasks()
+    @Query("DELETE FROM StateTask")
+    suspend fun deleteTableStateTask()
+    @Query("DELETE FROM Pending")
+    suspend fun deleteTablePending()
+    @Query("DELETE FROM Statistics")
+    suspend fun deleteTableStatistics()
+
 }

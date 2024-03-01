@@ -1,7 +1,8 @@
 package com.example.omega_tracker.data.remote_data.dataclasses
 import com.squareup.moshi.Json
 
-data class AllData(
+
+data class TaskRemoteData(
     @Json(name = "customFields")
     val customFields: List<CustomField>,
     @Json(name = "summary")

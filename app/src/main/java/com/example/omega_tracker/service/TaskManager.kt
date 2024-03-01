@@ -39,8 +39,6 @@ class TaskManager(val context: Context) {
         timeLaunch = parseTaskLaunchTime.parseTaskLaunchTime(intent?.getStringExtra(TIME_LAUNCH).toString())
     }
 
-
-
     fun startTask(intent: Intent?): Flow<ServiceTask> = flow {
         getDataFromIntent(intent)
         if (!mapRunningTask.containsKey(id)) {
@@ -58,12 +56,15 @@ class TaskManager(val context: Context) {
         mapRunningTask.remove(id)
     }
 
-    fun toggleStatusTimer(id: String?) {
-        mapRunningTask[id]?.toggleStatusTimer()
+    fun pauseTimer(id:String?){
+        mapRunningTask[id]?.pauseTimer()
+    }
+
+    fun continueTimer(id: String?){
+        mapRunningTask[id]?.continueTimer()
     }
 
     private fun log(text: String) {
         Log.d("MyLog", "$text")
     }
-
 }

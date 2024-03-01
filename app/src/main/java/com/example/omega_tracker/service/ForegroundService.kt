@@ -24,6 +24,7 @@ import com.example.omega_tracker.Constants.TIME_LEFT
 import com.example.omega_tracker.Constants.TIME_SPENT
 import com.example.omega_tracker.Constants.TITLE
 import com.example.omega_tracker.R
+import com.example.omega_tracker.data.TaskStatus
 import com.example.omega_tracker.entity.Task
 import com.example.omega_tracker.ui.screens.startTask.StartTaskActivity.Companion.createPendingIntent
 import com.example.omega_tracker.utils.FormatTime
@@ -48,10 +49,8 @@ class ForegroundService : Service() {
     private val broadCastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
-                PAUSE -> {
-                    pauseTimer(intent.getStringExtra(PAUSE))
-                }
-                CONTINUE -> continueTimer()
+                PAUSE -> pauseTimer(intent.getStringExtra(PAUSE))
+                CONTINUE -> continueTimer(intent.getStringExtra(CONTINUE))
             }
         }
     }
@@ -108,6 +107,7 @@ class ForegroundService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         CoroutineScope(Dispatchers.IO).launch {
+            Log.d("MyLog", "action = ${intent?.action}")
             when (intent?.action) {
                 START -> {
                     startTimer(taskManager, intent)
@@ -117,6 +117,9 @@ class ForegroundService : Service() {
                 }
                 STOP -> {
                     stopTimer(intent.getStringExtra(ID))
+                }
+                CONTINUE -> {
+                    continueTimer(intent.getStringExtra(ID))
                 }
                 RESTORE -> {
 
@@ -130,22 +133,27 @@ class ForegroundService : Service() {
     private fun startTimer(taskManager: TaskManager, intent: Intent?) {
         CoroutineScope(Dispatchers.Default).launch {
             taskManager.startTask(intent).collect { task ->
-                if (list.contains(task.id)) {
-                    NotificationManagerCompat.from(this@ForegroundService).apply {
-                        notify(
+                if (task.taskStatus == TaskStatus.Open) {
+                    list.remove(task.id)
+                    NotificationManagerCompat.from(this@ForegroundService)
+                        .cancel(task.id.hashCode())
+                } else {
+                    if (list.contains(task.id)) {
+                        NotificationManagerCompat.from(this@ForegroundService).apply {
+                            notify(
+                                task.id.hashCode(), createNotification(
+                                    task.title, task.timeSpent, task.id, applicationContext
+                                )
+                            )
+                        }
+                    } else {
+                        list.add(task.id)
+                        startForeground(
                             task.id.hashCode(), createNotification(
                                 task.title, task.timeSpent, task.id, applicationContext
                             )
                         )
-                        notify(1, groupNotification())
                     }
-                } else {
-                    list.add(task.id)
-                    startForeground(
-                        task.id.hashCode(), createNotification(
-                            task.title, task.timeSpent, task.id, applicationContext
-                        )
-                    )
                 }
                 onProgress?.invoke(task)
             }
@@ -195,16 +203,16 @@ class ForegroundService : Service() {
             .setSilent(true).setOngoing(true).setGroup(GROUP).setGroupSummary(true).build()
     }
 
-    fun continueTimer() {
-        pauseTimer = false
+    fun pauseTimer(stringExtra: String?) {
+        taskManager.pauseTimer(stringExtra)
     }
 
-    fun pauseTimer(stringExtra: String?) {
-        taskManager.toggleStatusTimer(stringExtra)
+    fun continueTimer(stringExtra: String?) {
+        taskManager.continueTimer(stringExtra)
     }
 
     enum class Action {
-        START, STOP, PAUSE, CONTINUE, RESTORE
+        START, STOP, CONTINUE
     }
 
     override fun bindService(p0: Intent, conn: ServiceConnection, flags: Int): Boolean {

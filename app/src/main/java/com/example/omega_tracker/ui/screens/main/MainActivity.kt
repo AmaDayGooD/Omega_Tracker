@@ -46,19 +46,11 @@ import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 
 class MainActivity : BaseActivity(R.layout.activity_main), MainView,
-    DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener, OnItemClickListener
-{
-
-    var t = 0
-
+    DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener, OnItemClickListener {
     companion object {
         fun createIntentMainActivity(context: Context): Intent {
             return Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-        }
-
-        fun test() {
-            Log.d("MyLog", "AHHAHHAHHAHAHHA")
         }
     }
 
@@ -68,7 +60,7 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
         MainPresenter(getToken()!!, Settings(this), adapter)
     }
 
-    //Переменные для кастомных задач
+    //variables for custom tasks
     private lateinit var dialog: Dialog
     private lateinit var dialogLoading: Dialog
     private var yearFromCalendar = 0
@@ -105,7 +97,7 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
         binding.buttonProfile.setOnClickListener {
             startActivity(createIntentProfile(this))
         }
-        // Добавить кастомную задачу
+        // Add custom task
         binding.buttonAddCustomTasks.setOnClickListener {
             showCreateCustomTaskDialog()
         }
@@ -113,16 +105,8 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
         binding.buttonStatistics.setOnClickListener {
             startActivity(createIntentStatisticsActivity(this))
         }
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
 
-        val oneTimeWorker =
-            OneTimeWorkRequest.Builder(WorkerResendingPendingTasks::class.java)
-                .setConstraints(constraints)
-                .build()
 
-        WorkManager.getInstance(applicationContext).enqueue(oneTimeWorker)
 
     }
 
@@ -138,18 +122,31 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
         super.onPause()
     }
 
+    private fun startWorker() {
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val oneTimeWorker =
+            OneTimeWorkRequest.Builder(WorkerResendingPendingTasks::class.java)
+                .setConstraints(constraints)
+                .build()
+
+        WorkManager.getInstance(applicationContext).enqueue(oneTimeWorker)
+    }
 
     override fun onResume() {
         super.onResume()
         presenter.updateListTask(currentStateList)
         presenter.getNotRunningTask()
+        startWorker()
     }
 
     override fun removeNotRunningTask(notRunningTask: RunningTask) {
         adapter.removeNotRunningTask(notRunningTask)
     }
 
-    //Получение названий проектов
+    //project names receiving
     override fun getAllNameProjects(allNameProjects: List<String>?) {
         if (allNameProjects != null) {
             nameProjects.addAll(allNameProjects)
@@ -177,7 +174,7 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
         adapter.removeTask(id)
     }
 
-    // Обновить список запущенных задач
+    // update the list of running tasks
     override fun updateRunningTask(listRunningTask: RunningTask) {
         adapter.updateRunningTask(listRunningTask)
     }
@@ -186,18 +183,18 @@ class MainActivity : BaseActivity(R.layout.activity_main), MainView,
         adapter.addRunningTask(itemLRunningTask)
     }
 
-    // Восстановить запущенные задачи
+    // restore the list of running tasks
     override fun restoreTask(task: Task) {
         startForegroundService(ForegroundService.startTimerService(this, task))
     }
 
-    // Получить токен
+    // get token
     private fun getToken(): String? {
         val settings = Settings(this)
         return settings.getToken()
     }
 
-    // Показать изображение профиля
+    // show the profile image
     override fun loadImageProfile(uri: Uri) {
         Glide.with(this).load(uri).error(
             GlideToVectorYou.init().with(this@MainActivity)

@@ -12,7 +12,6 @@ import retrofit2.Retrofit
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 import java.util.*
@@ -32,7 +31,7 @@ class StatisticsPresenter(private val settings: Settings) : BasePresenter<Statis
         OmegaTrackerApp.appComponent!!.inject(this)
         appRepository = AppRepository(coroutineContext, retrofit, dataBaseTasks)
         launch {
-            viewState.addDayInListShowDays(LocalDateTime.now())
+            viewState.addDateInListDate(LocalDateTime.now())
             showStatistics(getCurrentDisplay())
         }
     }
@@ -61,13 +60,7 @@ class StatisticsPresenter(private val settings: Settings) : BasePresenter<Statis
                 viewState.setNumberOfCompletedTasks(result.size)
                 viewState.setCurrentStatistics(calculateHourlyStatistics(result))
             } else {
-                when {
-                    toDay > LocalDateTime.now() ->
-                        viewState.addNextDay(calculateHourlyStatistics(result))
-
-                    toDay < LocalDateTime.now() ->
-                        viewState.addPreviewDay(calculateHourlyStatistics(result))
-                }
+                addNewData(toDay, result, false)
             }
         }
     }
@@ -80,20 +73,50 @@ class StatisticsPresenter(private val settings: Settings) : BasePresenter<Statis
         viewState.setTimeSpent(sumSpentTime)
     }
 
-    private fun getStatisticsToWeek() {
-        val today = LocalDateTime.now()
+//    fun setStartAndEndWeek(day: LocalDateTime):String {
+//        val start = day.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+//        val end = day.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
+//        return "$start - $end"
+//    }
+
+    fun getStatisticsToWeek(toDay: LocalDateTime = LocalDateTime.now()) {
         val startOfWeek =
-            today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).withHour(0).withMinute(0)
+            toDay.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).withHour(0).withMinute(0)
                 .withSecond(0).withNano(0)
         val endOfWeek =
-            today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY)).withHour(23).withMinute(59)
+            toDay.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY)).withHour(23).withMinute(59)
                 .withSecond(0).withNano(0)
-
         launch {
             val result = appRepository.getStatisticsToWeek(startOfWeek, endOfWeek)
+
             getSumSpentTime(result)
-            viewState.setNumberOfCompletedTasks(result.size)
-            viewState.setCurrentStatistics(calculateWeeklyStatistics(result))
+            if (toDay.toLocalDate() == LocalDate.now()) {
+                viewState.setNumberOfCompletedTasks(result.size)
+                viewState.setCurrentStatistics(calculateWeeklyStatistics(result))
+            } else {
+                addNewData(toDay, result, true)
+            }
+
+        }
+    }
+
+    private fun addNewData(toDay: LocalDateTime, result: List<Statistics>, type: Boolean) {
+        if (type) {
+            when {
+                toDay > LocalDateTime.now() ->
+                    viewState.addNextDayOrWeek(calculateWeeklyStatistics(result))
+
+                toDay < LocalDateTime.now() ->
+                    viewState.addPreviewDayOrWeek(calculateWeeklyStatistics(result))
+            }
+        } else {
+            when {
+                toDay > LocalDateTime.now() ->
+                    viewState.addNextDayOrWeek(calculateHourlyStatistics(result))
+
+                toDay < LocalDateTime.now() ->
+                    viewState.addPreviewDayOrWeek(calculateHourlyStatistics(result))
+            }
         }
     }
 
@@ -105,22 +128,92 @@ class StatisticsPresenter(private val settings: Settings) : BasePresenter<Statis
             val hourKey = it.dataTimeCompleted.format(formatter)
             val spentTimeInMinutes = it.duration.inWholeMinutes
             hourlyStatistics[hourKey] =
-                (hourlyStatistics.getOrDefault(hourKey, 0f) + spentTimeInMinutes)
+                hourlyStatistics.getOrDefault(hourKey, 0f) + spentTimeInMinutes
         }
 
-        for (hour in 8..17) {
-            val hourKey = String.format("%02d:00", hour)
-            hourlyStatistics.putIfAbsent(hourKey, 0f)
+        // Удаление крайних элементов с пустым значением value
+        while (hourlyStatistics.isNotEmpty() && hourlyStatistics.values.firstOrNull() == 0f) {
+            hourlyStatistics.remove(hourlyStatistics.keys.firstOrNull())
         }
-        log("hourlyStatistics $hourlyStatistics")
-        return hourlyStatistics.toSortedMap(compareBy { it })
+
+        // Проверка на наличие минимального количества элементов
+        if (hourlyStatistics.size in 1..3) {
+            val lastItem = hourlyStatistics.keys.last()
+            val firstItem = hourlyStatistics.keys.first()
+            if (hourlyStatistics.keys.first() == "00:00") {
+                var i = 1
+                while (hourlyStatistics.size != 4) {
+                    val substring = lastItem.substringBefore(":").toInt() + i
+                    hourlyStatistics["$substring:00"] = 0f
+                    i++
+                }
+            } else if (hourlyStatistics.keys.last() == "23:00") {
+                var i = 1
+                while (hourlyStatistics.size != 4) {
+                    val substring = firstItem.substringBefore(":").toInt() - i
+                    hourlyStatistics["$substring:00"] = 0f
+                    i++
+                }
+            } else {
+                var i = 1
+                var state = false
+                var substring = lastItem.substringBefore(":")
+                while (hourlyStatistics.size != 4) {
+
+                    var localSubstring: Int
+                    if (state) {
+                        localSubstring = substring.toInt() - i
+                    } else {
+                        localSubstring = substring.toInt() + i
+                    }
+                    if (localSubstring == 23) {
+                        substring = firstItem.substringBefore(":")
+                        state = true
+                        i = 1
+                    }
+                    when (state) {
+                        false -> hourlyStatistics["${localSubstring}:00"] = 0f
+                        true -> hourlyStatistics["${localSubstring}:00"] = 0f
+                    }
+                    i++
+                }
+            }
+        }
+
+        // Построение полного списка ключей по возрастанию
+        val sortedMap = hourlyStatistics.toSortedMap(compareBy { it.substringBefore(":").toInt() })
+        val sortedKeys = sortedMap.keys.toList()
+        val minKey = sortedKeys.firstOrNull()?.substringBefore(":")?.toInt() ?: 0
+        val maxKey = sortedKeys.lastOrNull()?.substringBefore(":")?.toInt() ?: 23
+        val completeKeys = (minKey..maxKey).map { String.format("%02d:00", it) }
+
+        // Создание новой отсортированной map без пропусков
+        val resultStatistics = mutableMapOf<String, Float>()
+        for (key in completeKeys) {
+            if (hourlyStatistics.containsKey(key)) {
+                resultStatistics[key] = hourlyStatistics[key]!!
+            } else {
+                resultStatistics[key] = 0f
+            }
+        }
+
+        // Если все значения map равны нулю, то создаём map с минимальным набором данных
+        if (resultStatistics.all { it.value == 0f }) {
+            resultStatistics.clear()
+            resultStatistics["08:00"] = 0f
+            resultStatistics["09:00"] = 0f
+            resultStatistics["10:00"] = 0f
+            resultStatistics["11:00"] = 0f
+        }
+        return resultStatistics
     }
+
 
     private fun calculateWeeklyStatistics(statisticsList: List<Statistics>): Map<String, Float> {
         val weeklyStatistics = mutableMapOf<String, Float>()
 
         // Добавляем все дни недели в словарь с начальным значением 0
-        val daysOfWeek = listOf("ПН", "ВТ", "СР", "ЧТ", "ПТ")
+        val daysOfWeek = listOf("ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС")
         daysOfWeek.forEach { day ->
             weeklyStatistics[day] = 0f
         }
@@ -132,6 +225,18 @@ class StatisticsPresenter(private val settings: Settings) : BasePresenter<Statis
             weeklyStatistics[dayKey] =
                 weeklyStatistics.getOrDefault(dayKey, 0f) + spentTimeInMinutes
         }
+        val saturdayValue = weeklyStatistics["СБ"]
+        val sundayValue = weeklyStatistics["ВС"]
+
+        when {
+            saturdayValue == 0f && sundayValue != 0f -> weeklyStatistics["СБ"] = 0f
+            saturdayValue != 0f && sundayValue == 0f -> weeklyStatistics.remove("ВС")
+            saturdayValue == 0f && sundayValue == 0f -> {
+                weeklyStatistics.remove("СБ")
+                weeklyStatistics.remove("ВС")
+            }
+        }
+
         return weeklyStatistics
     }
 

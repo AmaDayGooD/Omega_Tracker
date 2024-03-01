@@ -5,16 +5,18 @@ import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
+import android.util.Log
 import com.example.omega_tracker.Constants
 import com.example.omega_tracker.OmegaTrackerApp
 import com.example.omega_tracker.R
 import com.example.omega_tracker.data.TaskStatus
 import com.example.omega_tracker.data.local_data.Settings
-import com.example.omega_tracker.data.local_data.StatisticsData
+import com.example.omega_tracker.data.local_data.StatisticsLocalData
 import com.example.omega_tracker.data.repository.AppRepository
 import com.example.omega_tracker.data.local_data.TasksDao
 import com.example.omega_tracker.data.remote_data.dataclasses.*
 import com.example.omega_tracker.entity.Profile
+import com.example.omega_tracker.entity.StateTask
 import com.example.omega_tracker.entity.Task
 import com.example.omega_tracker.service.ForegroundService
 import com.example.omega_tracker.service.ServiceTask
@@ -50,7 +52,6 @@ class StartTaskPresenter(
                 viewState.setVisibleButtonSettings(task.taskType)
                 viewState.setTask(task)
             }
-            //appRepository.getStateBundle(token)
         }
     }
 
@@ -65,8 +66,7 @@ class StartTaskPresenter(
 
     private lateinit var appRepository: AppRepository
 
-    private var stateTask: List<StateBundleElement>? = arrayListOf()
-
+    private var stateTask: List<StateTask>? = arrayListOf()
 
     private var idTask: String = ""
     private var timeLeft: Duration = Duration.ZERO
@@ -91,6 +91,15 @@ class StartTaskPresenter(
                             viewState.showLayoutStartAndComplete()
                         } else {
                             viewState.showLayoutStartButton()
+                        }
+
+                        if(timeLeft != null){
+                            when(time.taskStatus){
+                                TaskStatus.Run->viewState.showLayoutStartAndComplete()
+                                TaskStatus.Pause->viewState.showLayoutStartAndComplete()
+                                TaskStatus.Open->viewState.showLayoutStartButton()
+                                TaskStatus.Pending->viewState.showLayoutStartButton()
+                            }
                         }
                         showTimer(time)
                     }
@@ -182,17 +191,17 @@ class StartTaskPresenter(
         }
     }
 
-    private fun insertPendingTask(trackTimeBody: TrackTimeBody) {
+    private fun insertPendingTask(bodyTrackTime: BodyTrackTime) {
         launch {
-            appRepository.insertPendingTask(idTask,trackTimeBody)
+            appRepository.insertPendingTask(idTask,bodyTrackTime)
         }
     }
 
     private fun createBodyPostTimeStent(
         idProfile: String, result: DataForResult
-    ): TrackTimeBody {
+    ): BodyTrackTime {
         val duration = "${result.day}д${result.hour}ч${result.minute}м"
-        return TrackTimeBody(
+        return BodyTrackTime(
             duration = Duration(duration),
             text = result.comment!!,
             date = System.currentTimeMillis(),
@@ -201,8 +210,8 @@ class StartTaskPresenter(
         )
     }
 
-    private fun createBodyCompletedTask(result: DataForResult, task: Task): StatisticsData {
-        return StatisticsData(
+    private fun createBodyCompletedTask(result: DataForResult, task: Task): StatisticsLocalData {
+        return StatisticsLocalData(
             idTask = task.id,
             nameTask = task.summary,
             spentTime = "${result.day}d${result.hour}h${result.minute}m",
@@ -210,8 +219,8 @@ class StartTaskPresenter(
         )
     }
 
-    private fun createBodyPostStateTask(idState: String): StateTask {
-        return StateTask(
+    private fun createBodyPostStateTask(idState: String): BodyStateTask {
+        return BodyStateTask(
             value = Id(idState)
         )
     }
@@ -237,6 +246,7 @@ class StartTaskPresenter(
     fun getStateList() {
         launch(Dispatchers.IO) {
             stateTask = appRepository.getStateBundle(token!!)
+
             viewState.setState(stateTask)
         }
     }

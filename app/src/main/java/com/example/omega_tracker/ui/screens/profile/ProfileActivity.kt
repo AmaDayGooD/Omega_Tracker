@@ -64,7 +64,7 @@ class ProfileActivity : BaseActivity(R.layout.activity_profile), ProfileView {
                 log("YouTrack")
             }
         }
-        buttonExit.setOnClickListener{
+        buttonExit.setOnClickListener {
             showAlertDialog()
         }
 

@@ -1,10 +1,10 @@
 package com.example.omega_tracker.data.local_data
 
-import android.util.Log
 import androidx.core.net.toUri
 import com.example.omega_tracker.data.AppDataTask
 import com.example.omega_tracker.data.DataStatistics
 import com.example.omega_tracker.data.TaskStatus
+import com.example.omega_tracker.entity.StateTask
 import com.example.omega_tracker.entity.Statistics
 import com.example.omega_tracker.entity.Task
 import retrofit2.Retrofit
@@ -22,6 +22,19 @@ class GetDataFromBd @Inject constructor(
 
     private val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
+    suspend fun setStateTask(stateTask: List<StateTask>) {
+        for (state in stateTask) {
+            val stateTaskLocal = convertingStateTaskToStateTaskLocalData(state)
+            if (state.name == "Duplicate")
+                continue
+            dataBaseTasks.setStateTask(stateTaskLocal)
+        }
+    }
+
+    suspend fun getStateBundle(): List<StateTask> {
+        return dataBaseTasks.getStateBundle()
+    }
+
     suspend fun getTaskForRestore(): MutableList<Task> {
         return convertingDataListFromNameEntity(dataBaseTasks.getTaskForRestore())
     }
@@ -34,11 +47,11 @@ class GetDataFromBd @Inject constructor(
         return convertingOneItemFromNameEntity(dataBaseTasks.getTasksById(id))
     }
 
-    suspend fun insertPendingTask(pendingTaskData: PendingTaskData) {
+    suspend fun insertPendingTask(pendingTaskData: PendingTaskLocalData) {
         dataBaseTasks.insertPendingTask(pendingTaskData)
     }
 
-    suspend fun getPendingTask(): List<PendingTaskData> {
+    suspend fun getPendingTask(): List<PendingTaskLocalData> {
         return dataBaseTasks.getPendingTask()
     }
 
@@ -50,16 +63,16 @@ class GetDataFromBd @Inject constructor(
         dataBaseTasks.updateTaskStatus(newStatus.toString(), idTask)
     }
 
-    suspend fun createCustomTask(taskData: TaskData) {
-        dataBaseTasks.insertTask(taskData)
+    suspend fun createCustomTask(taskLocalData: TaskLocalData) {
+        dataBaseTasks.insertTask(taskLocalData)
     }
 
     suspend fun getAllNameProjects(): List<String> {
         return dataBaseTasks.getAllNameProjects()
     }
 
-    suspend fun insertCompletedTask(statisticsData: StatisticsData) {
-        dataBaseTasks.insertCompletedTask(statisticsData)
+    suspend fun insertCompletedTask(statisticsLocalData: StatisticsLocalData) {
+        dataBaseTasks.insertCompletedTask(statisticsLocalData)
     }
 
     suspend fun getStatisticsToDay(
@@ -90,7 +103,7 @@ class GetDataFromBd @Inject constructor(
         dataBaseTasks.updateTimeCustomTask(timeSpent, idTask)
     }
 
-    suspend fun updateCustomTask(task: TaskData) {
+    suspend fun updateCustomTask(task: TaskLocalData) {
         dataBaseTasks.updateCustomTask(task)
     }
 
@@ -103,10 +116,21 @@ class GetDataFromBd @Inject constructor(
     }
 
     suspend fun clearDataBase() {
-        dataBaseTasks.clearDataBase()
+        dataBaseTasks.deleteTableTasks()
+        dataBaseTasks.deleteTablePending()
+        dataBaseTasks.deleteTableStateTask()
+        dataBaseTasks.deleteTableStatistics()
     }
 
-    private fun convertingOneItemFromNameEntity(result: TaskData): AppDataTask {
+    private fun convertingStateTaskToStateTaskLocalData(stateTask: StateTask): StateTaskLocalData {
+        return StateTaskLocalData(
+            id = stateTask.id,
+            localizedName = stateTask.localizedName,
+            name = stateTask.name
+        )
+    }
+
+    private fun convertingOneItemFromNameEntity(result: TaskLocalData): AppDataTask {
         return AppDataTask(
             id = result.id_tasks,
             nameProject = result.nameProject,
@@ -128,7 +152,7 @@ class GetDataFromBd @Inject constructor(
         )
     }
 
-    private fun convertingDataListFromNameEntity(result: MutableList<TaskData>): MutableList<Task> {
+    private fun convertingDataListFromNameEntity(result: MutableList<TaskLocalData>): MutableList<Task> {
         val appTaskList = mutableListOf<Task>()
         result.forEach {
             appTaskList.add(
@@ -160,9 +184,9 @@ class GetDataFromBd @Inject constructor(
         }
     }
 
-    private fun convertingStatisticsDataToStatistics(statisticsData: List<StatisticsData>): MutableList<Statistics> {
+    private fun convertingStatisticsDataToStatistics(statisticsLocalData: List<StatisticsLocalData>): MutableList<Statistics> {
         val statistics = mutableListOf<Statistics>()
-        statisticsData.forEach {
+        statisticsLocalData.forEach {
             statistics.add(
                 DataStatistics(
                     idTask = it.idTask,

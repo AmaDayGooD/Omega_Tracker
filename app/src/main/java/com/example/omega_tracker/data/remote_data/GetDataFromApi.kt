@@ -1,9 +1,8 @@
 package com.example.omega_tracker.data.remote_data
 
-import android.util.Log
 import androidx.core.net.toUri
 import com.example.omega_tracker.data.DataProfile
-import com.example.omega_tracker.data.local_data.TaskData
+import com.example.omega_tracker.data.local_data.TaskLocalData
 import com.example.omega_tracker.data.local_data.TasksDao
 import com.example.omega_tracker.data.remote_data.interfaces.YouTrackApi
 import com.example.omega_tracker.data.AppDataTask
@@ -27,7 +26,7 @@ class GetDataFromApi @Inject constructor(
     suspend fun getAllTasksApi(
         token: String, dataBaseTasks: TasksDao, dataFromDb: MutableList<Task>
     ): MutableList<AppDataTask>? {
-        val tasks = mutableListOf<AllData>()
+        val tasks = mutableListOf<TaskRemoteData>()
         try {
             tasks.addAll(apiInterface.getAllInfo(token))
 
@@ -73,7 +72,7 @@ class GetDataFromApi @Inject constructor(
     }
 
     suspend fun getProfile(token: String?): Profile? {
-        val profile: UserBody
+        val profile: BodyUser
         try {
             profile = apiInterface.getUserOne(token)
         } catch (e: Exception) {
@@ -83,8 +82,8 @@ class GetDataFromApi @Inject constructor(
         return convertingUserBodyFromAppDataProfile(profile)
     }
 
-    suspend fun getStateBundle(token: String): List<StateBundleElement>? {
-        val list: MutableList<StateBundleElement> = mutableListOf()
+    suspend fun getStateBundle(token: String): MutableList<StateTaskRemoteData>? {
+        val list: MutableList<StateTaskRemoteData> = mutableListOf()
         try {
             list.addAll(apiInterface.getStateBundleElement(token))
         } catch (e: Exception) {
@@ -94,7 +93,8 @@ class GetDataFromApi @Inject constructor(
         return list
     }
 
-    suspend fun postTimeSpent(token: String?, body: TrackTimeBody, idTask: String): Int {
+
+    suspend fun postTimeSpent(token: String?, body: BodyTrackTime, idTask: String): Int {
         try {
             apiInterface.postTimeSpent(token, body, idTask)
         } catch (e: IllegalArgumentException) {
@@ -116,7 +116,7 @@ class GetDataFromApi @Inject constructor(
         return 0
     }
 
-    suspend fun postStateTask(token: String?, body: StateTask, idTask: String): Boolean {
+    suspend fun postStateTask(token: String?, body: BodyStateTask, idTask: String): Boolean {
         try {
             apiInterface.postStateTask(token, body, idTask)
         } catch (e: IllegalArgumentException) {
@@ -139,7 +139,7 @@ class GetDataFromApi @Inject constructor(
     }
 
     private fun convertingDataListFromAllData(
-        result: MutableList<AllData>,
+        result: MutableList<TaskRemoteData>,
         dataFromDb: MutableList<Task>
     ): MutableList<AppDataTask> {
         val appTaskList = mutableListOf<AppDataTask>()
@@ -168,7 +168,7 @@ class GetDataFromApi @Inject constructor(
     }
 
     private fun convertingDataListFromAllData(
-        result: MutableList<AllData>
+        result: MutableList<TaskRemoteData>
     ): MutableList<AppDataTask> {
         val appTaskList = mutableListOf<AppDataTask>()
         result.forEach {
@@ -194,7 +194,7 @@ class GetDataFromApi @Inject constructor(
         return appTaskList
     }
 
-    private fun convertingDataListFromAllData(result: AllData): AppDataTask {
+    private fun convertingDataListFromAllData(result: TaskRemoteData): AppDataTask {
         return AppDataTask(
             id = result.id,                                                                 //id
             nameProject = result.project.name,                                              // Название проекта
@@ -213,8 +213,8 @@ class GetDataFromApi @Inject constructor(
         )
     }
 
-    private fun convertingDataFromAppTask(result: AppDataTask): TaskData {
-        return TaskData(
+    private fun convertingDataFromAppTask(result: AppDataTask): TaskLocalData {
+        return TaskLocalData(
             id_tasks = result.id,
             nameProject = result.nameProject,
             iconUrl = result.iconUrl.toString(),
@@ -231,8 +231,8 @@ class GetDataFromApi @Inject constructor(
         )
     }
 
-    private fun convertingDataFromAppTask(result: AppDataTask, dataFromDb: Task): TaskData {
-        return TaskData(
+    private fun convertingDataFromAppTask(result: AppDataTask, dataFromDb: Task): TaskLocalData {
+        return TaskLocalData(
             id_tasks = result.id,
             nameProject = result.nameProject,
             iconUrl = result.iconUrl.toString(),
@@ -249,7 +249,7 @@ class GetDataFromApi @Inject constructor(
         )
     }
 
-    private fun convertingUserBodyFromAppDataProfile(result: UserBody): Profile {
+    private fun convertingUserBodyFromAppDataProfile(result: BodyUser): Profile {
         return DataProfile(
             name = result.name,
             id = result.id,

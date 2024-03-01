@@ -1,12 +1,12 @@
 package com.example.omega_tracker.data.repository
 
-import android.util.Log
 import com.example.omega_tracker.data.AppDataTask
 import com.example.omega_tracker.data.TaskStatus
 import com.example.omega_tracker.data.local_data.*
 import com.example.omega_tracker.data.remote_data.GetDataFromApi
 import com.example.omega_tracker.data.remote_data.dataclasses.*
 import com.example.omega_tracker.entity.Profile
+import com.example.omega_tracker.entity.StateTask
 import com.example.omega_tracker.entity.Statistics
 import com.example.omega_tracker.entity.Task
 import com.example.omega_tracker.ui.screens.main.CustomTask
@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import retrofit2.Retrofit
 import java.time.LocalDateTime
-import java.time.LocalTime
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -69,25 +68,34 @@ class AppRepository @Inject constructor(
         return getDataFromBd.getTaskById(idTask)
     }
 
-    suspend fun insertPendingTask(idTask: String, timeTrackTimeBody: TrackTimeBody) {
-        val pendingTask = convertTrackTimeBodyToPendingData(idTask, timeTrackTimeBody)
+    suspend fun insertPendingTask(idTask: String, timeBodyTrackTime: BodyTrackTime) {
+        val pendingTask = convertTrackTimeBodyToPendingData(idTask, timeBodyTrackTime)
         getDataFromBd.insertPendingTask(pendingTask)
     }
 
 
-    suspend fun getStateBundle(token: String): List<StateBundleElement>? {
-        return getDataFromApi.getStateBundle(token)
+    suspend fun getStateBundle(token: String): List<StateTask> {
+        val stateBundleApi:MutableList<StateTaskRemoteData>? = getDataFromApi.getStateBundle(token)
+        stateBundleApi?.removeIf{it.localizedName == "Дубликат"}
+        return if (stateBundleApi.isNullOrEmpty()) {
+            getDataFromBd.getStateBundle()
+        } else
+            stateBundleApi
     }
 
-    suspend fun postTimeSpent(idTask: String, token: String, body: TrackTimeBody): Int {
+    suspend fun setStateTask(stateTask: List<StateTask>) {
+        getDataFromBd.setStateTask(stateTask)
+    }
+
+    suspend fun postTimeSpent(idTask: String, token: String, body: BodyTrackTime): Int {
         return getDataFromApi.postTimeSpent(token, body, idTask)
     }
 
-    suspend fun insertCompletedTask(result: StatisticsData) {
+    suspend fun insertCompletedTask(result: StatisticsLocalData) {
         getDataFromBd.insertCompletedTask(result)
     }
 
-    suspend fun postStateTask(idTask: String, token: String, body: StateTask): Boolean {
+    suspend fun postStateTask(idTask: String, token: String, body: BodyStateTask): Boolean {
         return getDataFromApi.postStateTask(token, body, idTask)
     }
 
@@ -111,7 +119,7 @@ class AppRepository @Inject constructor(
         dataBaseTasks.updateTimeLaunch(timeNow.toString(), idTask)
     }
 
-    suspend fun getStatisticsToDay(toDay:LocalDateTime): List<Statistics> {
+    suspend fun getStatisticsToDay(toDay: LocalDateTime): List<Statistics> {
         val toMorrowStart = toDay.plusDays(1).toLocalDate()
         return getDataFromBd.getStatisticsToDay(toDay.toLocalDate(), toMorrowStart)
     }
@@ -123,8 +131,8 @@ class AppRepository @Inject constructor(
         return getDataFromBd.getStatisticsToWeek(toDayStartWeek, toDayEndWeek)
     }
 
-    private fun convertPendingDataToTimeTrackBody(pendingTaskData: PendingTaskData): TrackTimeBody {
-        return TrackTimeBody(
+    private fun convertPendingDataToTimeTrackBody(pendingTaskData: PendingTaskLocalData): BodyTrackTime {
+        return BodyTrackTime(
             duration = Duration(pendingTaskData.duration),
             text = pendingTaskData.comment,
             date = pendingTaskData.date,
@@ -135,20 +143,20 @@ class AppRepository @Inject constructor(
 
     private fun convertTrackTimeBodyToPendingData(
         idTask: String,
-        trackTimeBody: TrackTimeBody
-    ): PendingTaskData {
-        return PendingTaskData(
+        bodyTrackTime: BodyTrackTime
+    ): PendingTaskLocalData {
+        return PendingTaskLocalData(
             idTask = idTask,
-            duration = trackTimeBody.timeSpent,
-            comment = trackTimeBody.text,
-            date = trackTimeBody.date,
-            stateTask = trackTimeBody.stateTask,
-            author = trackTimeBody.authorId
+            duration = bodyTrackTime.timeSpent,
+            comment = bodyTrackTime.text,
+            date = bodyTrackTime.date,
+            stateTask = bodyTrackTime.stateTask,
+            author = bodyTrackTime.authorId
         )
     }
 
-    private fun convertCustomTaskForTaskData(customTask: CustomTask): TaskData {
-        return TaskData(
+    private fun convertCustomTaskForTaskData(customTask: CustomTask): TaskLocalData {
+        return TaskLocalData(
             id_tasks = customTask.idTask!!,
             nameProject = customTask.nameProject!!,
             iconUrl = null,
@@ -181,9 +189,9 @@ class AppRepository @Inject constructor(
         getDataFromBd.updateCustomTask(convertCustomTaskToTaskData(task))
     }
 
-    private suspend fun convertCustomTaskToTaskData(task: CustomTask): TaskData {
+    private suspend fun convertCustomTaskToTaskData(task: CustomTask): TaskLocalData {
         val oldTask = getDataFromBd.getTaskById(task.idTask!!)
-        return TaskData(
+        return TaskLocalData(
             id_tasks = oldTask.id,
             nameProject = task.nameProject.toString(),
             iconUrl = null,

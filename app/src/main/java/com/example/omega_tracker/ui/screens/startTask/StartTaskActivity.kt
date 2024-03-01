@@ -19,11 +19,11 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.work.*
 import com.example.omega_tracker.Constants
+import com.example.omega_tracker.Constants.CONTINUE
 import com.example.omega_tracker.R
 import com.example.omega_tracker.data.TaskStatus
 import com.example.omega_tracker.data.local_data.Settings
 import com.example.omega_tracker.data.local_data.TasksDao
-import com.example.omega_tracker.data.remote_data.dataclasses.StateBundleElement
 import com.example.omega_tracker.databinding.ActivityStartTaskBinding
 import com.example.omega_tracker.entity.Task
 import com.example.omega_tracker.service.ForegroundService
@@ -32,12 +32,12 @@ import com.example.omega_tracker.Constants.PAUSE
 import com.example.omega_tracker.Constants.STOP
 import com.example.omega_tracker.Constants.TOAST_TYPE_WARNING
 import com.example.omega_tracker.data.local_data.TaskType
+import com.example.omega_tracker.entity.StateTask
 import com.example.omega_tracker.service.ForegroundService.Companion.completeTimerService
 import com.example.omega_tracker.service.ForegroundService.Companion.stopTimerService
 import com.example.omega_tracker.service.ServiceTask
 import com.example.omega_tracker.ui.base_class.BaseActivity
 import com.example.omega_tracker.ui.screens.main.CustomTask
-import com.example.omega_tracker.ui.screens.main.ReceiverCallBack
 import com.example.omega_tracker.utils.FormatTime
 import com.mikhaellopez.circularprogressbar.CircularProgressBar
 import retrofit2.Retrofit
@@ -51,7 +51,7 @@ import kotlin.time.Duration
 
 class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskView,
     DatePickerDialog.OnDateSetListener,
-    TimePickerDialog.OnTimeSetListener, ReceiverCallBack {
+    TimePickerDialog.OnTimeSetListener {
 
     companion object {
         fun createPendingIntent(context: Context, id: String): PendingIntent {
@@ -63,7 +63,6 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
         fun createIntentStartTask(context: Context, id: String): Intent {
             return Intent(context, StartTaskActivity::class.java).putExtra("id", id)
         }
-
     }
 
     private lateinit var binding: ActivityStartTaskBinding
@@ -92,7 +91,7 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
     private var timeLeft: Duration = Duration.ZERO
     private var timeSpent: Duration = Duration.ZERO
     private var timeFromLaunch: Duration = Duration.ZERO
-    private var stateTask: List<StateBundleElement>? = arrayListOf()
+    private var stateTask: List<StateTask>? = arrayListOf()
 
     private var monthForLabel = ""
     private var day: Int? = 0
@@ -129,6 +128,10 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
         // Отключаем кнопку до загрузки данных
         startButton.isEnabled = false
 
+        buttonBack.setOnClickListener {
+            finish()
+        }
+
         startButton.setOnClickListener {
             visibleButton()
             checkPause = false
@@ -139,10 +142,6 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
             presenter.updateStatus(infoTask.id, TaskStatus.Run)
             presenter.updateLaunchTime(infoTask.id)
             infoTask.taskStatus = TaskStatus.Run
-        }
-
-        buttonBack.setOnClickListener {
-            finish()
         }
 
         completeButton.setOnClickListener {
@@ -156,7 +155,7 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
 
         buttonContinue.setOnClickListener {
             presenter.updateStatus(infoTask.id, TaskStatus.Run)
-            val intent = Intent(getIntentForeground()).putExtra("ID", infoTask.id).setAction(PAUSE)
+            val intent = Intent(getIntentForeground()).putExtra("ID", infoTask.id).setAction(CONTINUE)
 
             startForegroundService(intent)
             binding.linearlayoutPause.visibility = View.VISIBLE
@@ -208,15 +207,6 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
 
     }
 
-
-    override fun resendingTask(result: Boolean) {
-        if (result) {
-            log("resendingTask from StartTask $result")
-        } else {
-            log("resendingTask from StartTask $result")
-        }
-    }
-
     override fun onStart() {
         super.onStart()
         connection = presenter.returnConnection()
@@ -224,15 +214,6 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
             bindService(it, connection, BIND_AUTO_CREATE)
         }
     }
-
-    override fun onResume() {
-        super.onResume()
-    }
-
-    override fun onPause() {
-        super.onPause()
-    }
-
     override fun setTask(taskInfo: Task) {
         infoTask = taskInfo
         timeSpent = taskInfo.usedTime
@@ -427,16 +408,13 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
             log("$text $result")
         } catch (e: java.time.format.DateTimeParseException) {
             e.printStackTrace()
-            log("ошибка ${e.message}")
             showToast(TOAST_TYPE_WARNING, R.string.error_in_field_term)
             return null
         } catch (e: Exception) {
             e.printStackTrace()
-            log("ошибка ${e.message}")
             showToast(TOAST_TYPE_WARNING, R.string.error_in_field_term)
             return null
         }
-
         return result
     }
 
@@ -469,7 +447,6 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
         }
     }
 
-
     override fun showLayoutStartButton() {
         binding.layoutOnlyStartButton.visibility = View.VISIBLE
         binding.layoutStartAndCompleteButton.visibility = View.GONE
@@ -488,7 +465,7 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
     }
 
     private fun showCompleteTaskDialog(
-        timeFromLaunch: Duration, stateTask: List<StateBundleElement>
+        timeFromLaunch: Duration, stateTask: List<StateTask>
     ) {
         val dialog = Dialog(this)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -620,9 +597,11 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
 
         val noBtn = dialog.findViewById(R.id.button_cancel) as CardView
         noBtn.setOnClickListener {
-            startService(getIntentForeground().also {
-                it.action = ForegroundService.Action.CONTINUE.toString()
-            })
+
+            val intent =
+                Intent(getIntentForeground()).putExtra("ID", infoTask.id).setAction(CONTINUE)
+            startForegroundService(intent)
+
             presenter.updateStatus(infoTask.id, TaskStatus.Run)
             dialog.dismiss()
         }
@@ -728,7 +707,7 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
         }
 
         cancel.setOnClickListener {
-            val intent = Intent(getIntentForeground()).putExtra("ID", infoTask.id).setAction(PAUSE)
+            val intent = Intent(getIntentForeground()).putExtra("ID", infoTask.id).setAction(CONTINUE)
             startForegroundService(intent)
             dialog.dismiss()
         }
@@ -793,7 +772,7 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
 
     @RequiresApi(Build.VERSION_CODES.Q)
     private fun onComplete(
-        timeFromLaunch: Duration, stateTask: List<StateBundleElement>
+        timeFromLaunch: Duration, stateTask: List<StateTask>
     ) {
         binding.layoutOnlyStartButton.visibility = View.VISIBLE
         binding.layoutStartAndCompleteButton.visibility = View.GONE
@@ -804,7 +783,7 @@ class StartTaskActivity : BaseActivity(R.layout.activity_start_task), StartTaskV
         }
     }
 
-    override fun setState(state: List<StateBundleElement>?) {
+    override fun setState(state: List<StateTask>?) {
         stateTask = state
     }
 

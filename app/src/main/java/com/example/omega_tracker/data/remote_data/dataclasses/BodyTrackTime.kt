@@ -3,7 +3,7 @@ package com.example.omega_tracker.data.remote_data.dataclasses
 import com.example.omega_tracker.entity.SendBody
 import com.squareup.moshi.Json
 
-data class TrackTimeBody(
+data class BodyTrackTime(
     @Json(name = "duration")
     val duration: Duration,
     @Json(name = "text")

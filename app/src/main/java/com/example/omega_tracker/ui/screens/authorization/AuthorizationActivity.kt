@@ -63,7 +63,7 @@ class AuthorizationActivity : BaseActivity(R.layout.activity_authorization), Aut
         buttonAuth.setOnClickListener {
             buttonAuth.isEnabled = false
             token = textView.text.toString()
-            presenter.auth(token)
+            presenter.authorization(token)
             buttonAuth.isEnabled = true
         }
     }

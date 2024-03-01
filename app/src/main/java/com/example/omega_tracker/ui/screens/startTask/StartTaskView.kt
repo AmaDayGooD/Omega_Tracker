@@ -2,7 +2,8 @@ package com.example.omega_tracker.ui.screens.startTask
 
 import com.example.omega_tracker.data.TaskStatus
 import com.example.omega_tracker.data.local_data.TaskType
-import com.example.omega_tracker.data.remote_data.dataclasses.StateBundleElement
+import com.example.omega_tracker.data.remote_data.dataclasses.StateTaskRemoteData
+import com.example.omega_tracker.entity.StateTask
 import com.example.omega_tracker.entity.Task
 import com.example.omega_tracker.service.ServiceTask
 import com.example.omega_tracker.ui.base_class.BaseView
@@ -47,7 +48,7 @@ interface StartTaskView : BaseView {
     fun showLayoutStartAndComplete()
 
     @MoxyViewCommand(StrategyType.ADD_TO_END)
-    fun setState(state: List<StateBundleElement>?)
+    fun setState(state: List<StateTask>?)
 
     @MoxyViewCommand(StrategyType.ADD_TO_END)
     fun stopServices()

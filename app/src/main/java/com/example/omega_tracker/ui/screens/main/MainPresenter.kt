@@ -81,6 +81,7 @@ class MainPresenter(
         }
     }
 
+
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             val subscribeToTime = (service as ForegroundService.BinderFromService)

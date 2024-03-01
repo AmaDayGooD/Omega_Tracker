@@ -2,7 +2,7 @@ package com.example.omega_tracker.data.remote_data.dataclasses
 
 import com.squareup.moshi.Json
 
-data class StateTask(
+data class BodyStateTask(
     @Json(name = "value")
     val value:Id
 )

@@ -2,21 +2,16 @@ package com.example.omega_tracker.ui.screens.statistics
 
 import android.content.Context
 import android.content.Intent
-import android.opengl.Visibility
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.style.AbsoluteSizeSpan
 import android.text.style.ForegroundColorSpan
 import android.view.View
 import androidx.appcompat.widget.SwitchCompat
-import androidx.core.view.isVisible
-import com.example.omega_tracker.Constants
 import com.example.omega_tracker.R
 import com.example.omega_tracker.data.local_data.Settings
 import com.example.omega_tracker.databinding.ActivityStatisticsBinding
 import com.example.omega_tracker.ui.base_class.BaseActivity
-import com.omega_r.libs.omegatypes.Color
-import com.omega_r.libs.omegatypes.textColor
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -43,7 +38,8 @@ class StatisticsActivity : BaseActivity(R.layout.activity_statistics), Statistic
     private var currentDisplay: Boolean = false
 
     // Список дней отображённых на графике
-    private var listDays = mutableListOf<LocalDateTime>()
+    private var listDate = mutableListOf<LocalDateTime>()
+    private var listWeek = mutableListOf<LocalDateTime>()
     private var saveIndex = -1
     private lateinit var chart: LineChartView
     private lateinit var switchDayAndWeek: SwitchCompat
@@ -71,13 +67,13 @@ class StatisticsActivity : BaseActivity(R.layout.activity_statistics), Statistic
 
         switchDayAndWeek.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                presenter.saveCurrentDisplay(isChecked)
-                currentDisplay = isChecked
+                presenter.saveCurrentDisplay(true)
+                currentDisplay = true
                 presenter.showStatistics(currentDisplay)
                 binding.textviewDayShown.visibility = View.GONE
             } else {
-                presenter.saveCurrentDisplay(isChecked)
-                currentDisplay = isChecked
+                presenter.saveCurrentDisplay(false)
+                currentDisplay = false
                 presenter.showStatistics(currentDisplay)
                 binding.textviewDayShown.apply {
                     visibility = View.VISIBLE
@@ -92,8 +88,8 @@ class StatisticsActivity : BaseActivity(R.layout.activity_statistics), Statistic
         }
     }
 
-    override fun addDayInListShowDays(day: LocalDateTime) {
-        listDays.add(day)
+    override fun addDateInListDate(day: LocalDateTime) {
+        listDate.add(day)
     }
 
     override fun setNumberOfCompletedTasks(number: Int) {
@@ -108,6 +104,8 @@ class StatisticsActivity : BaseActivity(R.layout.activity_statistics), Statistic
     override fun setCurrentStatistics(statistics: Map<String, Float>) {
         listX.clear()
         listY.clear()
+        listDate.clear()
+        addDateInListDate(LocalDateTime.now())
         statistics.forEach { (str, lon) ->
             listX.add(str)
             listY.add(lon)
@@ -160,15 +158,15 @@ class StatisticsActivity : BaseActivity(R.layout.activity_statistics), Statistic
         return spannableString
     }
 
-    override fun addNextDay(nextDay: Map<String, Float>) {
-        nextDay.forEach { (str, lon) ->
+    override fun addNextDayOrWeek(nextWeek: Map<String, Float>) {
+        nextWeek.forEach { (str, lon) ->
             listX.add(str)
             listY.add(lon)
         }
-        chart.addNewData(listX, listY)
+        chart.addNewData(listX, listY, type = true)
     }
 
-    override fun addPreviewDay(previewDay: Map<String, Float>) {
+    override fun addPreviewDayOrWeek(previewDay: Map<String, Float>) {
         // Создаем список для временного хранения новых элементов
         val tempListX = mutableListOf<String>()
         val tempListY = mutableListOf<Float>()
@@ -188,29 +186,48 @@ class StatisticsActivity : BaseActivity(R.layout.activity_statistics), Statistic
         listY.clear()
         listX.addAll(tempListX)
         listY.addAll(tempListY)
-
+        val amountHours = previewDay.size
         // Обновляем данные в графике
-        chart.addNewData(listX, listY)
+        chart.addNewData(listX, listY, amountHours, false)
     }
 
+    override fun addNextWeekOnGraphic() {
+        val nextWeek = listDate[listDate.size - 1].plusWeeks(1)
+        listDate.add(nextWeek)
+        presenter.getStatisticsToWeek(nextWeek)
+    }
+
+    override fun addPreviewWeekOnGraphic() {
+        val previewDay = listDate[0].minusWeeks(1)
+        listDate.add(0, previewDay)
+        presenter.getStatisticsToWeek(previewDay)
+    }
+
+
     override fun addNextDayOnGraphic() {
-        val nextDay = listDays[listDays.size - 1].plusDays(1)
-        listDays.add(nextDay)
+        val nextDay = listDate[listDate.size - 1].plusDays(1)
+        listDate.add(nextDay)
         presenter.getStatisticsToDay(nextDay)
-        showToast(Constants.TOAST_TYPE_INFO, R.string.yes)
     }
 
     override fun addPreviewDayOnGraphic() {
-        val previewDay = listDays[0].minusDays(1)
-        listDays.add(0, previewDay)
+        val previewDay = listDate[0].minusDays(1)
+        listDate.add(0, previewDay)
         presenter.getStatisticsToDay(previewDay)
-        showToast(Constants.TOAST_TYPE_INFO, R.string.no)
+    }
+
+    override fun getListDays(): List<String> {
+        val result = mutableListOf<String>()
+        listDate.forEach {
+            result.add(convertData(it))
+        }
+        return result
     }
 
 
     override fun setCurrentDay(indexCurrentDay: Int) {
         if (saveIndex != indexCurrentDay) {
-            val currentLocalDataTime = listDays[indexCurrentDay]
+            val currentLocalDataTime = listDate[indexCurrentDay]
             var currentDate = convertData(currentLocalDataTime)
             if (currentLocalDataTime.toLocalDate() == LocalDate.now()) {
                 binding.textviewDayShown.setTextColor(this.getColor(R.color.main))

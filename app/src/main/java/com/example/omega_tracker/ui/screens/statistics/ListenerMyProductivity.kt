@@ -5,6 +5,8 @@ interface ListenerMyProductivity {
 
     fun addNextDayOnGraphic()
     fun addPreviewDayOnGraphic()
-
-    fun setCurrentDay(indexCurrentDay:Int)
+    fun addNextWeekOnGraphic()
+    fun addPreviewWeekOnGraphic()
+    fun setCurrentDay(indexCurrentDay: Int)
+    fun getListDays(): List<String>
 }
